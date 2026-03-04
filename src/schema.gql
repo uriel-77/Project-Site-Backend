@@ -1,0 +1,44 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+"""Entidad que representa a un alumno del sistema"""
+type Alumno {
+  contenidosCompletados: [Contenido!]
+  email: String!
+  id: Int!
+  nombre: String!
+}
+
+type Contenido {
+  contenido_id: ID!
+  descripcion: String!
+  tipo: TipoContenido!
+  titulo: String!
+  unidad: Unidad
+  unidad_id: Float!
+}
+
+type Mutation {
+  completarContenido(alumnoId: Int!, contenidoId: Int!): Alumno
+}
+
+type Query {
+  alumnos: [Alumno!]!
+  contenido(id: Int!): Contenido
+  contenidos: [Contenido!]!
+  unidades: [Unidad!]!
+}
+
+enum TipoContenido {
+  LECCION
+  RECURSO
+  TAREA
+}
+
+type Unidad {
+  contenidos: [Contenido!]
+  descripcion: String!
+  id: Int!
+  nombre: String!
+}
