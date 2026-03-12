@@ -1,36 +1,29 @@
-// IMPORTS
-import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
-import { ManyToOne } from 'typeorm';
-import { Unidad } from './unidad.entity';
+import { ObjectType, Field, Int, ID, registerEnumType } from '@nestjs/graphql';
+import { TipoContenido } from '@prisma/client'; // <-- IMPORTANTE: Traer el enum de Prisma
+import { Unidad } from '../unidad/entities/unidad.entity';
 
-export enum TipoContenido {
-    LECCION = 'leccion',
-    RECURSO = 'recurso',
-    TAREA = 'tarea',
-}
-
+// Registramos el enum para que GraphQL lo entienda
 registerEnumType(TipoContenido, {
-    name: 'TipoContenido',
+  name: 'TipoContenido',
 });
 
 @ObjectType()
 export class Contenido {
-    @Field(() => ID)
-    contenido_id: number;
+  @Field(() => ID)
+  id: number; // Cambiado de contenido_id a id (como en Prisma)
 
-    @Field()
-    titulo: string;
+  @Field()
+  titulo: string;
 
-    @Field()
-    descripcion: string;
+  @Field()
+  descripcion: string;
 
-    @Field(() => TipoContenido)
-    tipo: TipoContenido;
+  @Field(() => TipoContenido, { nullable: true }) 
+  tipo?: TipoContenido;
 
-    @Field()
-    unidad_id: number;
+  @Field(() => Int)
+  unidadId: number; // Cambiado de unidad_id a unidadId (como en Prisma)
 
-    @Field(() => Unidad, { nullable: true })
-    @ManyToOne(() => Unidad, (unidad) => unidad.contenidos)
-    unidad: Unidad;
+  @Field(() => Unidad, { nullable: true })
+  unidad?: Unidad;
 }

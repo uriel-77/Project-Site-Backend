@@ -45,5 +45,4 @@ async crearAlumno(@Args('datos') datos: CreateAlumnoInput) {
     }
 
 
-
 }

@@ -1,42 +1,22 @@
 // --- Imports generales ---
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 
 // --- Imports de resolvers y entidades ---
-import { Alumno } from './entities/alumno.entity';
-import { Contenido } from './entities/contenido.entity';
-import { Unidad } from './entities/unidad.entity';
 import { AlumnoResolver } from './resolvers/alumno.resolver';
 import { ContenidoResolver } from './resolvers/contenido.resolver';
-import { UnidadResolver } from './resolvers/unidad.resolver';
 
-// --- Imports de servicios ---
+// --- Imports de servicios y módulos ---
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { UnidadModule } from './unidad/unidad.module'; // Este ya trae su propio Resolver y Service
+import { ContenidoService } from './services/contenido.service';
 
 @Module({
   imports: [
-    // Conexion principal (Supabase)
-    /*
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: host_supabase', 
-      port: 5432,
-      username: 'postgres',
-      password: 'password',
-      database: 'postgres',
-      entities: [Alumno, Contenido, Unidad],
-      synchronize: true, 
-    }),
-    */
-
-    // Registro de entidades
-    // TypeOrmModule.forFeature([Alumno, Contenido, Unidad]),
-
-    // Configuracion de GraphQL
+    // Configuración de GraphQL
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
@@ -45,13 +25,15 @@ import { AppService } from './app.service';
       introspection: true,
       plugins: [], 
     }),
+    UnidadModule, // <--- Esto es lo único que necesitamos para las unidades
   ],
   controllers: [AppController],
   providers: [
     AppService, 
     AlumnoResolver, 
     ContenidoResolver, 
-    UnidadResolver
+    ContenidoService,
+    // SE QUITÓ UnidadResolver de aquí para que no use el archivo viejo con datos falsos
   ],
 })
 export class AppModule {}

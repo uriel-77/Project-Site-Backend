@@ -1,6 +1,6 @@
 // IMPORTS
 import { Resolver, Query, ResolveField, Parent } from '@nestjs/graphql';
-import { Unidad } from '../entities/unidad.entity';
+import { Unidad } from '../unidad/entities/unidad.entity';
 import { Contenido } from '../entities/contenido.entity';
 
 @Resolver(() => Unidad)
