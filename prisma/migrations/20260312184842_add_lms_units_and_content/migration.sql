@@ -9,3 +9,4 @@ CREATE TABLE "Alumno" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Alumno_email_key" ON "Alumno"("email");
+    
