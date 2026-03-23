@@ -29,6 +29,13 @@ input CreateUnidadInput {
   exampleField: Int!
 }
 
+type Insignia {
+  icon: String!
+  id: Int!
+  nivel: String!
+  nombre: String!
+}
+
 type Mutation {
   completarContenido(alumnoId: Int!, contenidoId: Int!): Alumno
   crearAlumno(datos: CreateAlumnoInput!): Alumno!
@@ -41,8 +48,18 @@ type Query {
   alumnos: [Alumno!]!
   contenido(id: Int!): Contenido
   contenidos: [Contenido!]!
+  insignias: [Insignia!]!
+  rubricasPorPeriodo(periodo: Int!): [Rubrica!]!
   unidad(id: Int!): Unidad
   unidades: [Unidad!]!
+}
+
+type Rubrica {
+  criterios: String!
+  id: Int!
+  periodo: Int!
+  titulo: String!
+  url: String!
 }
 
 enum TipoContenido {

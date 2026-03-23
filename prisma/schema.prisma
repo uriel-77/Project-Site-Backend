@@ -49,7 +49,7 @@ model Estudiante {
   foto      String?
 }
 
-// 4. TABLA INSIGNIA (Gamificación)
+// 4. TABLA INSIGNIA
 model Insignia {
   id          Int     @id @default(autoincrement())
   nombre      String
@@ -66,11 +66,11 @@ model Alumno {
   email  String @unique
 }
 
-// 5. TABLA UNIDAD (Para la materia de Compiladores)
+// 5. TABLA UNIDAD 
 model Unidad {
   id          Int         @id @default(autoincrement())
   nombre      String
-  contenidos  Contenido[] // Relación: Una unidad tiene muchos contenidos
+  contenidos  Contenido[] 
 }
 
 // 6. TABLA CONTENIDO
@@ -81,16 +81,23 @@ model Contenido {
   tipo        TipoContenido @default(LECCION)
   orden       Int
   url_recurso String?       
-  contenido   String[]      // Arreglo de textos para los párrafos
+  contenido   String[]      
 
-  // Llave foránea para conectarlo con su Unidad
   unidadId    Int
   unidad      Unidad        @relation(fields: [unidadId], references: [id])
 }
 
-// Opciones estáticas (Enum)
 enum TipoContenido {
   LECCION
   RECURSO
   TAREA
+}
+
+// 7. TABLA RUBRICA
+model Rubrica {
+  id        Int      @id @default(autoincrement())
+  titulo    String
+  criterios String
+  url       String
+  periodo   Int
 }
