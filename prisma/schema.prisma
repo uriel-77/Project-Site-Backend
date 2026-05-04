@@ -79,6 +79,7 @@ model Contenido {
   titulo      String
   descripcion String
   tipo        TipoContenido @default(LECCION)
+  tipoMateria TipoMateria   @default(TEORIA_DE_LENGUAJES)
   orden       Int
   url_recurso String?       
   contenido   String[]      
@@ -91,6 +92,12 @@ enum TipoContenido {
   LECCION
   RECURSO
   TAREA
+}
+
+enum TipoMateria {
+  COMPILADORES
+  TEORIA_DE_LA_COMPUTACION
+  TEORIA_DE_LENGUAJES
 }
 
 // 7. TABLA RUBRICA

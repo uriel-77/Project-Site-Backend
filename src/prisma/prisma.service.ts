@@ -1,9 +1,192 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { existsSync, readFileSync } from 'fs';
+
+const { Pool } = require('pg');
+
+type QueryArgs = {
+  where?: Record<string, unknown>;
+  data?: any;
+  include?: Record<string, unknown>;
+  orderBy?: Record<string, 'asc' | 'desc' | Record<string, 'asc' | 'desc'>>;
+};
 
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit {
+export class PrismaService implements OnModuleInit, OnModuleDestroy {
+  private readonly databaseUrl = this.getDatabaseUrl();
+
+  private readonly pool = new Pool({
+    connectionString: this.databaseUrl,
+  });
+
+  readonly contenido = {
+    findMany: async () => this.findContenidos(),
+    findUnique: async ({ where }: QueryArgs) =>
+      this.findContenidoById(Number(where?.id)),
+  };
+
+  readonly unidad = {
+    findMany: async (args?: QueryArgs) => this.findUnidades(args),
+    findUnique: async ({ where, include }: QueryArgs) =>
+      this.findUnidadById(Number(where?.id), Boolean(include?.contenidos)),
+    create: async ({ data }: QueryArgs) => this.createUnidad(data),
+    update: async ({ where, data }: QueryArgs) =>
+      this.updateUnidad(Number(where?.id), data),
+    delete: async ({ where }: QueryArgs) => this.deleteUnidad(Number(where?.id)),
+  };
+
+  readonly alumno = {
+    findMany: async () => this.queryRows('SELECT id, nombre, email FROM "Alumno" ORDER BY id ASC'),
+    create: async ({ data }: QueryArgs) =>
+      this.queryOne(
+        'INSERT INTO "Alumno" (nombre, email) VALUES ($1, $2) RETURNING id, nombre, email',
+        [data?.nombre, data?.email],
+      ),
+  };
+
+  readonly insignia = {
+    findMany: async () =>
+      this.queryRows(
+        'SELECT id, nombre, nivel, descripcion, icon, color, requisito FROM "Insignia" ORDER BY id ASC',
+      ),
+  };
+
+  readonly rubrica = {
+    findMany: async ({ where }: QueryArgs) =>
+      this.queryRows(
+        'SELECT id, titulo, criterios, url, periodo FROM "Rubrica" WHERE periodo = $1 ORDER BY id ASC',
+        [where?.periodo],
+      ),
+  };
+
   async onModuleInit() {
-    await this.$connect();
+    await this.pool.query('SELECT 1');
+  }
+
+  async onModuleDestroy() {
+    await this.pool.end();
+  }
+
+  private async findContenidos() {
+    return this.queryRows(`
+      SELECT
+        id,
+        titulo,
+        descripcion,
+        tipo,
+        "tipoMateria",
+        orden,
+        url_recurso,
+        contenido,
+        "unidadId"
+      FROM "Contenido"
+      ORDER BY "unidadId" ASC, orden ASC, id ASC
+    `);
+  }
+
+  private async findContenidoById(id: number) {
+    return this.queryOne(
+      `
+        SELECT
+          id,
+          titulo,
+          descripcion,
+          tipo,
+          "tipoMateria",
+          orden,
+          url_recurso,
+          contenido,
+          "unidadId"
+        FROM "Contenido"
+        WHERE id = $1
+      `,
+      [id],
+    );
+  }
+
+  private async findUnidades(args?: QueryArgs) {
+    const unidades = await this.queryRows(
+      'SELECT id, nombre FROM "Unidad" ORDER BY id ASC',
+    );
+
+    if (!args?.include?.contenidos) {
+      return unidades;
+    }
+
+    const contenidos = await this.findContenidos();
+    return unidades.map((unidad) => ({
+      ...unidad,
+      contenidos: contenidos.filter((contenido) => contenido.unidadId === unidad.id),
+    }));
+  }
+
+  private async findUnidadById(id: number, includeContenidos: boolean) {
+    const unidad = await this.queryOne('SELECT id, nombre FROM "Unidad" WHERE id = $1', [
+      id,
+    ]);
+
+    if (!unidad || !includeContenidos) {
+      return unidad;
+    }
+
+    const contenidos = await this.queryRows(
+      `
+        SELECT
+          id,
+          titulo,
+          descripcion,
+          tipo,
+          "tipoMateria",
+          orden,
+          url_recurso,
+          contenido,
+          "unidadId"
+        FROM "Contenido"
+        WHERE "unidadId" = $1
+        ORDER BY orden ASC, id ASC
+      `,
+      [id],
+    );
+
+    return { ...unidad, contenidos };
+  }
+
+  private async createUnidad(data?: any) {
+    return this.queryOne('INSERT INTO "Unidad" (nombre) VALUES ($1) RETURNING id, nombre', [
+      data?.nombre,
+    ]);
+  }
+
+  private async updateUnidad(id: number, data?: any) {
+    return this.queryOne(
+      'UPDATE "Unidad" SET nombre = COALESCE($1, nombre) WHERE id = $2 RETURNING id, nombre',
+      [data?.nombre, id],
+    );
+  }
+
+  private async deleteUnidad(id: number) {
+    return this.queryOne('DELETE FROM "Unidad" WHERE id = $1 RETURNING id, nombre', [id]);
+  }
+
+  private async queryRows(sql: string, params: unknown[] = []) {
+    const result = await this.pool.query(sql, params);
+    return result.rows;
+  }
+
+  private async queryOne(sql: string, params: unknown[] = []) {
+    const result = await this.pool.query(sql, params);
+    return result.rows[0] ?? null;
+  }
+
+  private getDatabaseUrl() {
+    if (process.env.DATABASE_URL) {
+      return process.env.DATABASE_URL;
+    }
+
+    if (!existsSync('.env')) {
+      return undefined;
+    }
+
+    const env = readFileSync('.env', 'utf8');
+    return env.match(/DATABASE_URL="?([^"\n]+)"?/)?.[1];
   }
 }

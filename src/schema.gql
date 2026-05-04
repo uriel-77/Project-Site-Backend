@@ -11,12 +11,16 @@ type Alumno {
 }
 
 type Contenido {
+  contenido: [String!]!
   descripcion: String!
   id: ID!
+  orden: Int!
   tipo: TipoContenido
+  tipoMateria: TipoMateria!
   titulo: String!
   unidad: Unidad
   unidadId: Int!
+  url_recurso: String
 }
 
 input CreateAlumnoInput {
@@ -25,8 +29,7 @@ input CreateAlumnoInput {
 }
 
 input CreateUnidadInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  nombre: String!
 }
 
 type Insignia {
@@ -68,6 +71,12 @@ enum TipoContenido {
   TAREA
 }
 
+enum TipoMateria {
+  COMPILADORES
+  TEORIA_DE_LA_COMPUTACION
+  TEORIA_DE_LENGUAJES
+}
+
 type Unidad {
   contenidos: [Contenido!]
   id: Int!
@@ -75,7 +84,6 @@ type Unidad {
 }
 
 input UpdateUnidadInput {
-  """Example field (placeholder)"""
-  exampleField: Int
   id: Int!
+  nombre: String
 }
