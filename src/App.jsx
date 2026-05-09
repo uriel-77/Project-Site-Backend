@@ -95,12 +95,6 @@ function App() {
             onPeriodChange={setCurrentPeriod}
           />
         );
-
-<<<<<<< HEAD
-=======
-      case 'Ambientes de Programacion.':
-      case 'Compiladores':
->>>>>>> 11d2f30373505ed4893f9f92d89b4fdb346c4608
       case 'Contexto Nacional III':
       case 'Sistemas Operativos':
       case 'SO en Red':
