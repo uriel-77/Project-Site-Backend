@@ -378,9 +378,6 @@ const Course = ({ courseName, currentPeriod, onPeriodChange }) => {
                 <i data-lucide="book" className="text-green-600 w-5 h-5"></i>
                 Guión Didáctico
               </h3>
-              <p className="text-xs text-gray-500 mb-4">
-                Apuntes por unidad (faltan 2 unidades por terminar).
-              </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 {Object.values(unidades).map(({ unidad, contenidos }) => (

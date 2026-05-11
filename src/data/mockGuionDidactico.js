@@ -3274,7 +3274,7 @@ export const CONTENIDOS_MOCK = [
   {
     contenido_id: 1,
     titulo: '1.1 Sistemas formales y teoría de conjuntos',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Definición de sistema formal, propiedades (coherencia, completitud, decidibilidad) y operaciones con conjuntos.',
     tipo: TipoContenido.LECCION,
     orden: 1,
@@ -3466,7 +3466,7 @@ Ambos conjuntos tienen  |𝑋|= |𝑌|= 3. Lo que significa que tienen la misma 
   {
     contenido_id: 2,
     titulo: '1.2 Conceptos y elementos para el diseño de lenguajes',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Elementos fundamentales para el diseño de lenguajes de programación.',
     tipo: TipoContenido.LECCION,
     orden: 2,
@@ -3518,7 +3518,7 @@ Algunos lenguajes, como Haskell o ML, incluyen además un sistema de inferencia 
   {
     contenido_id: 3,
     titulo: '1.3 Sistemas de traducción y compilación',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Conceptos de traductores, intérpretes y compiladores.',
     tipo: TipoContenido.LECCION,
     orden: 3,
@@ -3739,7 +3739,7 @@ El primer compilador de Pascal desarrollado en Zurich por Wirth fue posible grac
   {
     contenido_id: 4,
     titulo: '1.4 Fases y pasos del compilador',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Análisis léxico, sintáctico, semántico, generación de código intermedio y optimización.',
     tipo: TipoContenido.LECCION,
     orden: 4,
@@ -3846,7 +3846,7 @@ Los programas interpretados suelen ser más lentos que los compilados, pero los 
   {
     contenido_id: 5,
     titulo: '1.5 Traductor simple orientado a la sintaxis',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Análisis semántico y traducción orientada a la sintaxis.',
     tipo: TipoContenido.LECCION,
     orden: 5,
@@ -4028,7 +4028,7 @@ Hay muchas variaciones en la cantidad de optimación de código que ejecutan los
   {
     contenido_id: 6,
     titulo: '2.1 Expresiones regulares y Autómatas Finitos',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Conceptos de expresiones regulares y autómatas finitos deterministas y no deterministas.',
     tipo: TipoContenido.LECCION,
     orden: 1,
@@ -4173,7 +4173,7 @@ Diagrama de un autómata finito no determinístico con ε – transiciones
   {
     contenido_id: 7,
     titulo: '2.2 Autómata Finito No Determinista (AFND) a Autómata Finito Determinista (AFD)',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Transformación de Expresiones Regulares a Autómatas Finitos No Deterministas con transiciones épsilon.',
     tipo: TipoContenido.LECCION,
     orden: 2,
@@ -4275,7 +4275,7 @@ F = {qf}
   {
     contenido_id: 8,
     titulo: '2.3 Autómata Finito No Determinista con épsilon (AFND-Ɛ) a Autómata Finito No Determinista (AFD)',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Transformación de AFND con épsilon a AFND sin épsilon.',
     tipo: TipoContenido.LECCION,
     orden: 3,
@@ -4327,7 +4327,7 @@ PASO 3. Se desarrolla otra tabla de transiciones con los nuevos estados
   {
     contenido_id: 9,
     titulo: '2.4 Lema de Arden, Conversión de Autómata Finito a Expresión Regular',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Transformación de Autómatas Finitos No Deterministas a Deterministas.',
     tipo: TipoContenido.TAREA,
     orden: 4,
@@ -4502,7 +4502,7 @@ F = {q0, q1, q2, q3}
   {
     contenido_id: 10,
     titulo: '3.1 Elementos de diseño de Analizadores Léxicos',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Principios y componentes del análisis léxico en compiladores.',
     tipo: TipoContenido.LECCION,
     orden: 1,
@@ -4603,7 +4603,7 @@ El atributo liga se ha incluido en la tabla de ejemplo simplemente para facilita
   {
     contenido_id: 113,
     titulo: '3.2 Diseño o descripción de una aplicación que requiera el uso de un lenguaje de programación.',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Construcción de una aplicación usando un lenguaje de programación (Java, C++, C)',
     tipo: TipoContenido.RECURSO,
     orden: 2,
@@ -4670,7 +4670,7 @@ Esta es la definición de un BNFE el cual tiene a las variables NO terminales co
   {
     contenido_id: 11,
     titulo: '3.3 Diseño de un lenguaje simple de programación.',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Construcción de un lenguaje de programación',
     tipo: TipoContenido.RECURSO,
     orden: 4,
@@ -4728,7 +4728,7 @@ Conclusión. - Puede ser la revisión de lo descrito, un resumen, llamado a la a
   {
     contenido_id: 11,
     titulo: '3.4 Definición de Léxico mediante expresiones regulares',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Uso de expresiones regulares para definir los tokens de un lenguaje.',
     tipo: TipoContenido.RECURSO,
     orden: 5,
@@ -4814,7 +4814,7 @@ La calculadora realiza operaciones aritméticas como son la suma, resta, multipl
   {
     contenido_id: 12,
     titulo: '3.5 Implementación con herramienta automatizada (JFLAP, MTSolution)',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Uso de herramientas como Lex/Flex para generar analizadores léxicos automáticamente.',
     tipo: TipoContenido.TAREA,
     orden: 6,
@@ -4878,7 +4878,7 @@ EJEMPLOS:
   {
     contenido_id: 13,
     titulo: '4.1 Gramáticas Regulares y Gramáticas Libres de Contexto',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Conceptos básicos, árboles de derivación y recursividad.',
     tipo: TipoContenido.LECCION,
     orden: 1,
@@ -4988,7 +4988,7 @@ Una gramática G se llama recursiva en A, A  ∈ ΣN
     {
     contenido_id: 14,
     titulo: '4.2 Obtención de una forma depurada (simplificada) de una gramática',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Eliminación de aquellos símbolos que no derivan en terminales o son inalcanzables, producciones vacías e inconsistencias para simplificar el análisis sintáctico.',
     tipo: TipoContenido.LECCION,
     orden: 1,
@@ -5039,7 +5039,7 @@ Esto ayuda a simplificar la gramática.
     {
     contenido_id: 15,
     titulo: '4.3 Obtención de la forma normal de Chomsky de una gramática libre de contexto',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Simplificación de una gramática libre de contexto limitando sus producciones a dos tipos: no terminal derivando en dos no terminales y no terminal derivado en un único terminal',
     tipo: TipoContenido.LECCION,
     orden: 1,
@@ -5230,7 +5230,7 @@ Por lo tanto, la gramática ya está en Forma Normal de Chomsky.
   {
     contenido_id: 16,
     titulo: '4.4 Obtención de la forma normal de Greibach de una Gramática Libre de Contexto',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Eliminación de la recursión a la izquierda para garantizar que cada paso consuma exactamente un símbolo de la entrada, facilitando el diseño de autómatas de pila.',
     tipo: TipoContenido.LECCION,
     orden: 2,
@@ -5413,7 +5413,7 @@ Por eso la FNG se usa para construir autómatas de pila de manera más directa.
   {
     contenido_id: 17,
     titulo: '5.1 Análisis Sintáctico Descendente Predictivo y gramáticas LL y LR',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Gramáticas LL, LR y construcción de analizadores descendentes predictivos.',
     tipo: TipoContenido.LECCION,
     orden: 1,
@@ -5474,7 +5474,7 @@ F --> (E) | id
     {
     contenido_id: 18,
     titulo: '5.2 Herramientas automatizadas para el desarrollo de un Analizador Sintáctico',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Las herramientas automatizadas (Yacc o ANTLR) generan código para un analizador sintáctico a partir de una gramática formal, facilitando la construcción de compiladores.',
     tipo: TipoContenido.RECURSO,
     orden: 2,
@@ -5516,7 +5516,7 @@ Integración total con el ecosistema de objetos de Java.
   {
     contenido_id: 19,
     titulo: '5.3 Notaciones para especificar la sintaxis y tabla de símbolos',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Direfentes notaciones para la estructura de un Lenguaje de progrmación',
     tipo: TipoContenido.RECURSO,
     orden: 3,
@@ -5577,7 +5577,7 @@ Diagrama de Transición:`
   {
     contenido_id: 20,
     titulo: '5.4 Procedimientos para la tabla de análisis sintáctico',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Cálculo de conjuntos Primero y Siguiente para construcción de tablas LL',
     tipo: TipoContenido.TAREA,
     orden: 4,
@@ -5610,7 +5610,7 @@ Todo lo que esté en SIGUIENTE(A) se agrega a SIGUIENTE(B).
   {
     contenido_id: 21,
     titulo: '5.5 Implementación de un analizador Sintáctico con un lenguaje de programación (Java, C++, C)',
-area: AreaComputacion.TEORIA_DE_LENGUAJES,
+area: AreaComputacion.COMPILADORES,
     descripcion: 'Desarrollar e implementar analizadores sintácticos eficientes mediante el uso de herramientas automatizadas y lenguajes de programación de alto nivel',
     tipo: TipoContenido.TAREA,
     orden: 5,
