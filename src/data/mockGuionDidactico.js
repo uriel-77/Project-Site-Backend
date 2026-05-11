@@ -12,7 +12,7 @@ export const CONTENIDOS_MOCK = [
       {
           contenido_id: 1,
           titulo: '1.1 Presentación del Profesor, Objetivos del curso, Descripción del temario y Forma de evalucación',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'Pendiente',
           tipo: TipoContenido.LECCION,
           orden: 1,
@@ -78,7 +78,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 2,
           titulo: 'Ejercicios de repaso para la Unidad I',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'Pendiente',
           tipo: TipoContenido.LECCION,
           orden: 2,
@@ -103,7 +103,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 3,
           titulo: '2.1 Introducción a la teoría, para la construcción de un compilador',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'Pendiente',
           tipo: TipoContenido.LECCION,
           orden: 1,
@@ -250,7 +250,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 4,
           titulo: '2.2 Concepto de comunicación',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'Pendiente',
           tipo: TipoContenido.LECCION,
           orden: 2,
@@ -311,7 +311,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 5,
           titulo: '2.3 Concepto de traductor',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'Pendiente',
           tipo: TipoContenido.TAREA,
           orden: 4,
@@ -411,7 +411,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 6,
           titulo: '2.4 Traductores',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.LECCION,
           orden: 5,
@@ -739,7 +739,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 7,
           titulo: 'Ejercicios de repaso para la Unidad II',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.LECCION,
           orden: 6,
@@ -811,7 +811,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 8,
           titulo: '3.1 Lenguajes',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.LECCION,
           orden: 1,
@@ -869,7 +869,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 9,
           titulo: '3.2 Lenguajes Formales y Naturales',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendeinte',
           tipo: TipoContenido.RECURSO,
           orden: 2,
@@ -982,7 +982,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 10,
           titulo: '3.3 Comunicación Hombre-Máquina y Ergonomía',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.RECURSO,
           orden: 4,
@@ -1005,7 +1005,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 11,
           titulo: 'Ejercicios de repaso para la Unidad III',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.TAREA,
           orden: 5,
@@ -1027,7 +1027,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 12,
           titulo: '4.1 Proceso de Interpretación',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.LECCION,
           orden: 1,
@@ -1055,7 +1055,7 @@ export const CONTENIDOS_MOCK = [
           {
           contenido_id: 13,
           titulo: '4.2 Proceso de Compilación',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.LECCION,
           orden: 2,
@@ -1158,7 +1158,7 @@ export const CONTENIDOS_MOCK = [
           {
           contenido_id: 14,
           titulo: '4.3 Fases y Componentes',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.LECCION,
           orden: 3,
@@ -1247,7 +1247,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 15,
           titulo: '4.4 Optimización de código',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.LECCION,
           orden: 4,
@@ -1271,7 +1271,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 16,
           titulo: 'Ejercicios de repaso para la Unidad IV',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.LECCION,
           orden: 5,
@@ -1297,7 +1297,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 17,
           titulo: '5.1 Estructura general del lenguaje y Expresiones Regulares',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.LECCION,
           orden: 1,
@@ -1611,7 +1611,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 18,
           titulo: '5.2 Autómatas o Diagramas de transición',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.RECURSO,
           orden: 2,
@@ -1781,7 +1781,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 19,
           titulo: '5.3 Tablas de símbolos',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.TAREA,
           orden: 3,
@@ -1857,7 +1857,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 20,
           titulo: '5.4 Manejo de errores',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.TAREA,
           orden: 4,
@@ -1991,7 +1991,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 21,
           titulo: '5.5 Ejercicios de programación de analizadores mediante LEX',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.TAREA,
           orden: 5,
@@ -2080,7 +2080,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 22,
           titulo: 'Ejercicios de repaso para la Unidad V',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.TAREA,
           orden: 6,
@@ -2125,7 +2125,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 23,
           titulo: '6.1 Estructura General del Lenguaje y Gramáticas Independientes del contexto',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.TAREA,
           orden: 1,
@@ -2607,7 +2607,7 @@ export const CONTENIDOS_MOCK = [
           {
           contenido_id: 24,
           titulo: '6.2 Autómatas Sintácticos',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.TAREA,
           orden: 2,
@@ -2719,7 +2719,7 @@ export const CONTENIDOS_MOCK = [
           {
           contenido_id: 25,
           titulo: '6.3 Algotirmo de conversión',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.TAREA,
           orden: 3,
@@ -2819,7 +2819,7 @@ export const CONTENIDOS_MOCK = [
           {
           contenido_id: 26,
           titulo: 'Ejercicios de repaso para la Unidad VI',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.TAREA,
           orden: 7,
@@ -2870,7 +2870,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 27,
           titulo: '7.1 Concepto de Semántica',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.TAREA,
           orden: 1,
@@ -2948,7 +2948,7 @@ export const CONTENIDOS_MOCK = [
           {
           contenido_id: 28,
           titulo: '7.2 Autómatas Semánticos',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.TAREA,
           orden: 2,
@@ -3015,7 +3015,7 @@ export const CONTENIDOS_MOCK = [
           {
           contenido_id: 29,
           titulo: '7.3 Gramática con atributos y expresión mínima',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.TAREA,
           orden: 3,
@@ -3085,7 +3085,7 @@ export const CONTENIDOS_MOCK = [
           {
           contenido_id: 30,
           titulo: '7.4 Tablas Semánticas',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.TAREA,
           orden: 4,
@@ -3122,7 +3122,7 @@ export const CONTENIDOS_MOCK = [
           {
           contenido_id: 31,
           titulo: '7.5 Manejo de errores',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.TAREA,
           orden: 5,
@@ -3183,7 +3183,7 @@ export const CONTENIDOS_MOCK = [
           {
           contenido_id: 32,
           titulo: 'Ejercicios de repaso para la Unidad VII',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.TAREA,
           orden: 6,
@@ -3211,7 +3211,7 @@ export const CONTENIDOS_MOCK = [
         {
           contenido_id: 33,
           titulo: '8.1 Elaboración del Proyecto',
-      area: AreaComputacion.COMPILADORES,
+      area: AreaComputacion.TEORIA_COMPUTACION,
           descripcion: 'pendiente',
           tipo: TipoContenido.TAREA,
           orden: 1,

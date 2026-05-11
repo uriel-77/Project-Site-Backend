@@ -82,7 +82,13 @@ function App() {
         return <Home onNavigate={setCurrentView} />;
 
       case 'Teoría de la Computación.':
-        return <OtherCourse courseName={currentView} />;
+         return (
+          <Course
+            courseName={currentView}
+            currentPeriod={currentPeriod}
+            onPeriodChange={setCurrentPeriod}
+          />
+        );
         
 
       // Las demás materias usan el componente genérico
@@ -99,13 +105,7 @@ function App() {
       case 'Sistemas Operativos':
       case 'SO en Red':
       case 'Teoría de Lenguajes':
-        return (
-          <Course
-            courseName={currentView}
-            currentPeriod={currentPeriod}
-            onPeriodChange={setCurrentPeriod}
-          />
-        );
+       
       case 'UDF Maestria':
         return <OtherCourse courseName={currentView} />;
 
