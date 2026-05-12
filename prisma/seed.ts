@@ -1,4 +1,4 @@
-import { PrismaClient, TipoContenido, TipoMateria } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import * as vm from 'vm';
@@ -21,16 +21,34 @@ type MockContenido = {
 
 const prisma = new PrismaClient();
 
-const AREA_TO_TIPO_MATERIA: Record<string, TipoMateria> = {
-  Compiladores: TipoMateria.COMPILADORES,
-  'Teoría de la Computación.': TipoMateria.TEORIA_DE_LA_COMPUTACION,
-  'Teoría de Lenguajes': TipoMateria.TEORIA_DE_LENGUAJES,
+type TipoContenidoValue = 'LECCION' | 'RECURSO' | 'TAREA';
+type TipoMateriaValue =
+  | 'COMPILADORES'
+  | 'TEORIA_DE_LA_COMPUTACION'
+  | 'TEORIA_DE_LENGUAJES';
+
+const TIPO_CONTENIDO = {
+  LECCION: 'LECCION',
+  RECURSO: 'RECURSO',
+  TAREA: 'TAREA',
+} as const satisfies Record<TipoContenidoValue, TipoContenidoValue>;
+
+const TIPO_MATERIA = {
+  COMPILADORES: 'COMPILADORES',
+  TEORIA_DE_LA_COMPUTACION: 'TEORIA_DE_LA_COMPUTACION',
+  TEORIA_DE_LENGUAJES: 'TEORIA_DE_LENGUAJES',
+} as const satisfies Record<TipoMateriaValue, TipoMateriaValue>;
+
+const AREA_TO_TIPO_MATERIA: Record<string, TipoMateriaValue> = {
+  Compiladores: TIPO_MATERIA.COMPILADORES,
+  'Teoría de la Computación.': TIPO_MATERIA.TEORIA_DE_LA_COMPUTACION,
+  'Teoría de Lenguajes': TIPO_MATERIA.TEORIA_DE_LENGUAJES,
 };
 
-const UNIT_ID_OFFSET: Record<TipoMateria, number> = {
-  [TipoMateria.TEORIA_DE_LA_COMPUTACION]: 0,
-  [TipoMateria.COMPILADORES]: 100,
-  [TipoMateria.TEORIA_DE_LENGUAJES]: 200,
+const UNIT_ID_OFFSET: Record<TipoMateriaValue, number> = {
+  [TIPO_MATERIA.TEORIA_DE_LA_COMPUTACION]: 0,
+  [TIPO_MATERIA.COMPILADORES]: 100,
+  [TIPO_MATERIA.TEORIA_DE_LENGUAJES]: 200,
 };
 
 function cargarMock(): MockContenido[] {
@@ -60,15 +78,15 @@ function cargarMock(): MockContenido[] {
   return sandbox.module.exports.CONTENIDOS_MOCK ?? [];
 }
 
-function normalizarTipoContenido(tipo: string): TipoContenido {
+function normalizarTipoContenido(tipo: string): TipoContenidoValue {
   switch (tipo.toUpperCase()) {
-    case TipoContenido.RECURSO:
-      return TipoContenido.RECURSO;
-    case TipoContenido.TAREA:
-      return TipoContenido.TAREA;
-    case TipoContenido.LECCION:
+    case TIPO_CONTENIDO.RECURSO:
+      return TIPO_CONTENIDO.RECURSO;
+    case TIPO_CONTENIDO.TAREA:
+      return TIPO_CONTENIDO.TAREA;
+    case TIPO_CONTENIDO.LECCION:
     default:
-      return TipoContenido.LECCION;
+      return TIPO_CONTENIDO.LECCION;
   }
 }
 
@@ -130,8 +148,8 @@ async function sembrarContenidos(
   contenidos: {
     titulo: string;
     descripcion: string;
-    tipo: TipoContenido;
-    tipoMateria: TipoMateria;
+    tipo: TipoContenidoValue;
+    tipoMateria: TipoMateriaValue;
     orden: number;
     url_recurso: string | null;
     contenido: string[];
@@ -141,7 +159,7 @@ async function sembrarContenidos(
   await prisma.contenido.deleteMany({
     where: {
       tipoMateria: {
-        in: [TipoMateria.TEORIA_DE_LA_COMPUTACION, TipoMateria.COMPILADORES],
+        in: [TIPO_MATERIA.TEORIA_DE_LA_COMPUTACION, TIPO_MATERIA.COMPILADORES],
       },
     },
   });
