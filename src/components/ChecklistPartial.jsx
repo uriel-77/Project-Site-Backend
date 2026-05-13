@@ -68,6 +68,22 @@ const ChecklistPartial = ({ checklist, parcial, grupo, estudianteId, onArchivoSu
                         {actividad.descripcion && (
                           <p className="text-xs text-gray-500 mt-1">{actividad.descripcion}</p>
                         )}
+                        {actividad.videos?.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {actividad.videos.map((video) => (
+                              <a
+                                key={video.id}
+                                href={video.youtubeUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700"
+                              >
+                                <i data-lucide="play-circle" className="w-4 h-4"></i>
+                                {video.titulo}
+                              </a>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </td>
                     <td className="border border-gray-300 px-4 py-3 text-center">

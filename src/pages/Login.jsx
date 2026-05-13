@@ -1,6 +1,6 @@
 // pages/Login.jsx
 import React from 'react';
-import { guardarUsuarioLogueado } from '../utils/localStorage';
+import { guardarSesionAuth } from '../utils/localStorage';
 import { iniciarSesionAlumno } from '../services/authApi';
 
 const Login = ({ onNavigate, onLoginSuccess }) => {
@@ -33,26 +33,23 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
     }
 
     try {
-      const usuario = await iniciarSesionAlumno(formData);
+      const resultado = await iniciarSesionAlumno(formData);
 
-      // Guardar usuario logueado
-      guardarUsuarioLogueado(usuario);
+      guardarSesionAuth(resultado);
 
-      alert('¡Bienvenido/a!');
       setFormData({ email: '', password: '' });
 
-      // Redirigir según tipo de usuario
       if (onLoginSuccess) {
-        onLoginSuccess(usuario);
+        onLoginSuccess(resultado.usuario);
       } else {
-        switch (usuario.tipo) {
-          case 'estudiante':
+        switch (resultado.usuario.tipo) {
+          case 'alumno':
             onNavigate('StudentDashboard');
             break;
-          case 'profesor':
+          case 'moderador':
             onNavigate('TeacherDashboard');
             break;
-          case 'admin':
+          case 'administrador':
             onNavigate('AdminDashboard');
             break;
           default:
@@ -136,7 +133,7 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
         <div className="mt-6">
           <div className="bg-blue-50 p-3 rounded-lg text-xs text-blue-800">
             <p className="font-semibold mb-1">Acceso con backend</p>
-            <p>Inicia sesión con una cuenta registrada desde este formulario.</p>
+            <p>Usuarios soportados: alumnos, moderadores y administradores.</p>
           </div>
         </div>
 

@@ -19,14 +19,28 @@ export const guardarBD = (bd) => {
  * Obtiene un usuario logueado (si existe)
  */
 export const obtenerUsuarioLogueado = () => {
-  const usuarioJSON = localStorage.getItem('usuario_logueado');
-  return usuarioJSON ? JSON.parse(usuarioJSON) : null;
+  const sesion = obtenerSesionAuth();
+  return sesion?.usuario || null;
 };
 
 /**
  * Guarda usuario logueado
  */
 export const guardarUsuarioLogueado = (usuario) => {
+  const sesionActual = obtenerSesionAuth();
+  guardarSesionAuth({
+    token: sesionActual?.token || '',
+    usuario,
+  });
+};
+
+export const obtenerSesionAuth = () => {
+  const sesionJSON = localStorage.getItem('auth_session');
+  return sesionJSON ? JSON.parse(sesionJSON) : null;
+};
+
+export const guardarSesionAuth = ({ token, usuario }) => {
+  localStorage.setItem('auth_session', JSON.stringify({ token, usuario }));
   localStorage.setItem('usuario_logueado', JSON.stringify(usuario));
 };
 
@@ -34,6 +48,7 @@ export const guardarUsuarioLogueado = (usuario) => {
  * Elimina usuario logueado (logout)
  */
 export const cerrarSesion = () => {
+  localStorage.removeItem('auth_session');
   localStorage.removeItem('usuario_logueado');
 };
 

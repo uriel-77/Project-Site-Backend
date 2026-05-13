@@ -80,7 +80,6 @@ const Register = ({ onNavigate }) => {
         grupo: formData.grupo,
       });
 
-      alert('¡Registro exitoso! Ahora puedes iniciar sesión');
       setFormData({ nombre: '', apellido: '', email: '', password: '', confirmPassword: '', grupo: '' });
       onNavigate('Iniciar Sesión');
     } catch (submitError) {
@@ -93,7 +92,7 @@ const Register = ({ onNavigate }) => {
   return (
     <div className="max-w-md mx-auto fade-in">
       <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-        <h2 className="text-3xl font-bold text-[#6b2132] mb-6 text-center">Registro de Estudiante</h2>
+        <h2 className="text-3xl font-bold text-[#6b2132] mb-6 text-center">Registro de Alumno</h2>
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4 flex items-center gap-2">

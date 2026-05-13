@@ -42,11 +42,11 @@ function App() {
       setUsuarioLogueado(usuario);
       
       // Redirigir al dashboard correspondiente
-      if (usuario.tipo === 'estudiante') {
+      if (usuario.tipo === 'alumno') {
         setCurrentView('StudentDashboard');
-      } else if (usuario.tipo === 'profesor') {
+      } else if (usuario.tipo === 'moderador') {
         setCurrentView('TeacherDashboard');
-      } else if (usuario.tipo === 'admin') {
+      } else if (usuario.tipo === 'administrador') {
         setCurrentView('AdminDashboard');
       }
     }
@@ -69,11 +69,11 @@ function App() {
     setUsuarioLogueado(usuario);
 
     // Redirigir según tipo
-    if (usuario.tipo === 'estudiante') {
+    if (usuario.tipo === 'alumno') {
       setCurrentView('StudentDashboard');
-    } else if (usuario.tipo === 'profesor') {
+    } else if (usuario.tipo === 'moderador') {
       setCurrentView('TeacherDashboard');
-    } else if (usuario.tipo === 'admin') {
+    } else if (usuario.tipo === 'administrador') {
       setCurrentView('AdminDashboard');
     }
   };
@@ -141,7 +141,7 @@ function App() {
       case 'Iniciar Sesión':
         return <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />;
 
-      case 'Estudiante dashboard':
+      case 'StudentDashboard':
         return usuarioLogueado ? (
           <StudentDashboard usuario={usuarioLogueado} onNavigate={handleNavigate} onLogout={handleLogout} />
         ) : (
@@ -149,14 +149,14 @@ function App() {
         );
 
       case 'TeacherDashboard':
-        return usuarioLogueado && usuarioLogueado.tipo === 'profesor' ? (
+        return usuarioLogueado && usuarioLogueado.tipo === 'moderador' ? (
           <TeacherDashboard usuario={usuarioLogueado} onNavigate={handleNavigate} onLogout={handleLogout} />
         ) : (
           <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
         );
 
       case 'AdminDashboard':
-        return usuarioLogueado && usuarioLogueado.tipo === 'admin' ? (
+        return usuarioLogueado && usuarioLogueado.tipo === 'administrador' ? (
           <AdminDashboard usuario={usuarioLogueado} onNavigate={handleNavigate} onLogout={handleLogout} />
         ) : (
           <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />

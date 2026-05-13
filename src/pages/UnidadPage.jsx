@@ -39,8 +39,7 @@ const useFadeIn = () => {
 const ImageBloque = ({ url, figureNum }) => {
     const { ref, visible } = useFadeIn();
     const [loaded, setLoaded] = useState(false);
-    const [error, setError] = useState(false);
-    const embedUrl = toPreviewUrl(url);
+    const error = false;
 
     return (
         <div
@@ -237,6 +236,7 @@ const UnidadPage = ({ contenido, onBack, onNextSection, nextSectionLabel }) => {
     const items = contenido.contenido;
     const numFiguras = items.filter(isGoogleDriveUrl).length;
     const numSecciones = items.filter(i => !isGoogleDriveUrl(i)).length;
+    const videos = contenido.videos || [];
 
     const tipoNormalizado = typeof contenido.tipo === 'string'
         ? contenido.tipo.toLowerCase()
@@ -343,6 +343,56 @@ const UnidadPage = ({ contenido, onBack, onNextSection, nextSectionLabel }) => {
                         return <TextoBloque key={index} texto={item} />;
                     })}
                 </div>
+
+                {videos.length > 0 && (
+                    <section className="mt-12">
+                        <div className="flex items-center justify-between gap-3 mb-5">
+                            <div>
+                                <p className="text-xs uppercase tracking-[0.25em] text-red-500 font-semibold">
+                                    Videos
+                                </p>
+                                <h2 className="text-2xl font-bold text-gray-900">
+                                    Material audiovisual del tema
+                                </h2>
+                            </div>
+                            <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
+                                {videos.length} recurso{videos.length !== 1 ? 's' : ''}
+                            </span>
+                        </div>
+
+                        <div className="grid gap-5">
+                            {videos.map((video) => (
+                                <article key={video.id} className="rounded-2xl border border-red-100 bg-white shadow-sm overflow-hidden">
+                                    <div className="aspect-video bg-black">
+                                        <iframe
+                                            src={`https://www.youtube.com/embed/${video.youtubeId}`}
+                                            title={video.titulo}
+                                            className="w-full h-full"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                        />
+                                    </div>
+                                    <div className="p-5">
+                                        <div className="flex flex-wrap gap-2 mb-3">
+                                            {(video.tipos || []).map((tipo) => (
+                                                <span
+                                                    key={tipo}
+                                                    className="rounded-full bg-red-50 px-3 py-1 text-[11px] font-semibold text-red-700"
+                                                >
+                                                    {tipo.toLowerCase()}
+                                                </span>
+                                            ))}
+                                        </div>
+                                        <h3 className="text-lg font-bold text-gray-900">{video.titulo}</h3>
+                                        {video.descripcion ? (
+                                            <p className="mt-2 text-sm text-gray-600">{video.descripcion}</p>
+                                        ) : null}
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    </section>
+                )}
 
                 {/* Footer */}
                 <div className="mt-16 pt-8 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4">
