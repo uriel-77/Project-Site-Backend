@@ -31,6 +31,41 @@
 $ npm install
 ```
 
+## Local backend
+
+El proyecto ya incluye un archivo `.env` local listo para arrancar usando la base de Railway:
+
+```bash
+DATABASE_URL="postgresql://postgres:TU_PASSWORD@mainline.proxy.rlwy.net:37629/railway"
+PORT=3001
+NODE_ENV=development
+```
+
+Pasos para levantarlo localmente usando Railway:
+
+```bash
+# 1. Arrancar el backend
+$ npm run start
+```
+
+Notas:
+
+- `npm run start` ahora usa `nest start`, por lo que ya no depende de tener `dist/` compilado antes.
+- Si quieres usar PostgreSQL local en Docker, cambia `DATABASE_URL` en `.env` por:
+
+```bash
+DATABASE_URL="postgresql://postgres:password123@127.0.0.1:5433/ipn_lms?schema=public"
+```
+
+Luego ejecuta:
+
+```bash
+$ npm run db:up
+$ npx prisma migrate deploy
+$ npm run db:seed
+$ npm run start
+```
+
 ## Compile and run the project
 
 ```bash
@@ -82,6 +117,18 @@ Notas de despliegue:
 - Si `DATABASE_URL` no existe, la app fallará con un error explícito en vez de intentar conectarse a `localhost:5432`.
 - Si usas PostgreSQL de Railway, vincula la base al servicio backend para que inyecte `DATABASE_URL`.
 - En Railway no uses `localhost`, `127.0.0.1` ni `::1` como host de Postgres. Debes usar la URL privada/pública del servicio PostgreSQL vinculado.
+
+Variables recomendadas en Railway:
+
+```bash
+# Backend
+DATABASE_URL=${{ Postgres.DATABASE_URL }}
+NODE_ENV=production
+
+# Frontend compiladores
+REACT_APP_GRAPHQL_API_URL=https://project-site-backend-production.up.railway.app/graphql
+REACT_APP_USE_MOCK_GUION=false
+```
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
 
