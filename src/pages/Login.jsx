@@ -44,13 +44,13 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
       } else {
         switch (resultado.usuario.tipo) {
           case 'alumno':
-            onNavigate('StudentDashboard');
+            onNavigate('Panel del Alumno');
             break;
           case 'moderador':
-            onNavigate('TeacherDashboard');
+            onNavigate('Panel de Moderación');
             break;
           case 'administrador':
-            onNavigate('AdminDashboard');
+            onNavigate('Panel de Administración');
             break;
           default:
             onNavigate('Inicio');

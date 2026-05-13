@@ -18,6 +18,12 @@ const authPages = [
   { name: 'Iniciar Sesión', icon: 'log-in' },
 ];
 
+const VISTAS_PANEL = {
+  alumno: 'Panel del Alumno',
+  moderador: 'Panel de Moderación',
+  administrador: 'Panel de Administración',
+};
+
 function renderNavItems(items, currentView, onClick, activeClass, defaultClass) {
   return (
     <ul className="space-y-1">
@@ -144,7 +150,7 @@ const Sidebar = ({
                 Aula
               </div>
               {renderNavItems(
-                [{ name: 'StudentDashboard', icon: 'layout-dashboard' }, ...courses],
+                [{ name: VISTAS_PANEL.alumno, icon: 'layout-dashboard' }, ...courses],
                 currentView,
                 handleNavigation,
                 'bg-gray-900 border-l-4 border-blue-500 text-white',
@@ -157,7 +163,7 @@ const Sidebar = ({
                 Moderación
               </div>
               {renderNavItems(
-                [{ name: 'TeacherDashboard', icon: 'file-pen-line' }, ...courses],
+                [{ name: VISTAS_PANEL.moderador, icon: 'file-pen-line' }, ...courses],
                 currentView,
                 handleNavigation,
                 'bg-gray-900 border-l-4 border-amber-500 text-white',
@@ -170,7 +176,7 @@ const Sidebar = ({
                 Administración
               </div>
               {renderNavItems(
-                [{ name: 'AdminDashboard', icon: 'shield-check' }, ...courses],
+                [{ name: VISTAS_PANEL.administrador, icon: 'shield-check' }, ...courses],
                 currentView,
                 handleNavigation,
                 'bg-gray-900 border-l-4 border-rose-500 text-white',

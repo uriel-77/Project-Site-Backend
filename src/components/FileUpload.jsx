@@ -5,6 +5,17 @@ const FileUpload = ({ onFileSelect, actividadId, onSubmit }) => {
   const [archivo, setArchivo] = useState(null);
   const [cargando, setCargando] = useState(false);
 
+  const leerComoBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = typeof reader.result === 'string' ? reader.result : '';
+        resolve(result.split(',')[1] || '');
+      };
+      reader.onerror = () => reject(new Error('No fue posible leer el archivo.'));
+      reader.readAsDataURL(file);
+    });
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -37,15 +48,27 @@ const FileUpload = ({ onFileSelect, actividadId, onSubmit }) => {
     }
 
     setCargando(true);
-    // Simular envío
-    setTimeout(() => {
+    try {
+      const archivoBase64 = await leerComoBase64(archivo);
       if (onSubmit) {
-        onSubmit(archivo, actividadId);
+        await onSubmit(
+          {
+            archivo,
+            archivoBase64,
+            nombreArchivo: archivo.name,
+            mimeType: archivo.type || 'application/octet-stream',
+            tamano: archivo.size,
+          },
+          actividadId,
+        );
       }
       setArchivo(null);
       document.getElementById(`file-input-${actividadId}`).value = '';
+    } catch (error) {
+      alert(error.message || 'No fue posible subir el archivo.');
+    } finally {
       setCargando(false);
-    }, 500);
+    }
   };
 
   return (

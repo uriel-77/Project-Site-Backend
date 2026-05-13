@@ -72,7 +72,9 @@ const SearchResults = ({ query, files }) => {
                   {file.date}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <a href="#" className="text-indigo-600 hover:text-indigo-900">Ver</a>
+                  <button type="button" className="text-indigo-600 hover:text-indigo-900">
+                    Ver
+                  </button>
                 </td>
               </tr>
             ))}

@@ -1,14 +1,8 @@
 // components/Header.jsx
-import React, { useState } from 'react';
+import React from 'react';
 
 const Header = ({ title, onSearch, onMenuToggle }) => {
-  const [isSearchPanelOpen, setIsSearchPanelOpen] = useState(false);
-  const [searchInput, setSearchInput] = useState('');
-
-  const handleSearch = () => {
-    onSearch(searchInput);
-    setIsSearchPanelOpen(false);
-  };
+  void onSearch;
 
   return (
     <header className="bg-white shadow-sm z-10 sticky top-0">

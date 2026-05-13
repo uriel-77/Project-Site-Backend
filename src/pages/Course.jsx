@@ -236,13 +236,13 @@ const Course = ({ courseName, currentPeriod, onPeriodChange }) => {
                 allowFullScreen
               ></iframe>
             </div>
-            <a
-              href="#"
+            <button
+              type="button"
               className="text-sm text-green-700 hover:underline flex items-center gap-1"
             >
               <i data-lucide="chevron-right" className="w-4 h-4"></i>
               Ver más detalles
-            </a>
+            </button>
           </div>
         </div>
 

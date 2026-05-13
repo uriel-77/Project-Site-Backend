@@ -1,19 +1,37 @@
 // components/ChecklistPartial.jsx
 import React, { useState } from 'react';
 import FileUpload from './FileUpload';
-import { verificarActividadEntregada, marcarActividadEntregada } from '../utils/localStorage';
+import { registrarEntrega } from '../services/evaluacionApi';
 
-const ChecklistPartial = ({ checklist, parcial, grupo, estudianteId, onArchivoSubido }) => {
+const ChecklistPartial = ({
+  checklist,
+  parcial,
+  grupo,
+  estudianteId,
+  entregas = [],
+  onArchivoSubido,
+}) => {
   const [mostrarSubida, setMostrarSubida] = useState({});
 
-  const handleSubmitArchivo = (archivo, actividadId) => {
-    marcarActividadEntregada(parcial, grupo, estudianteId, actividadId);
-    alert('Archivo entregado exitosamente');
+  const handleSubmitArchivo = async (archivoPayload, actividadId) => {
+    await registrarEntrega({
+      asignacionId: actividadId,
+      alumnoId: estudianteId,
+      grupo,
+      parcial,
+      nombreArchivo: archivoPayload.nombreArchivo,
+      mimeType: archivoPayload.mimeType,
+      tamano: archivoPayload.tamano,
+      archivoBase64: archivoPayload.archivoBase64,
+    });
     setMostrarSubida({ ...mostrarSubida, [actividadId]: false });
     if (onArchivoSubido) {
-      onArchivoSubido();
+      await onArchivoSubido();
     }
   };
+
+  const estaEntregada = (actividadId) =>
+    entregas.some((entrega) => Number(entrega.asignacionId) === Number(actividadId));
 
   const calcularPorcentajeTotal = () => {
     return checklist.actividades
@@ -23,7 +41,7 @@ const ChecklistPartial = ({ checklist, parcial, grupo, estudianteId, onArchivoSu
 
   const calcularEntregadas = () => {
     return checklist.actividades.filter(a => 
-      a.entregable && verificarActividadEntregada(parcial, grupo, estudianteId, a.id)
+      a.entregable && estaEntregada(a.id)
     ).length;
   };
 
@@ -58,7 +76,10 @@ const ChecklistPartial = ({ checklist, parcial, grupo, estudianteId, onArchivoSu
           </thead>
           <tbody>
             {checklist.actividades.map((actividad, idx) => {
-              const entregada = verificarActividadEntregada(parcial, grupo, estudianteId, actividad.id);
+              const entregada = estaEntregada(actividad.id);
+              const entrega = entregas.find(
+                (item) => Number(item.asignacionId) === Number(actividad.id),
+              );
               return (
                 <React.Fragment key={actividad.id}>
                   <tr className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
@@ -84,6 +105,11 @@ const ChecklistPartial = ({ checklist, parcial, grupo, estudianteId, onArchivoSu
                             ))}
                           </div>
                         )}
+                        {entrega ? (
+                          <p className="mt-2 text-[11px] text-green-700">
+                            Archivo: {entrega.nombreArchivo}
+                          </p>
+                        ) : null}
                       </div>
                     </td>
                     <td className="border border-gray-300 px-4 py-3 text-center">

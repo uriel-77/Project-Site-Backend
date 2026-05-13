@@ -128,6 +128,33 @@ export const obtenerCalificacionesGrupo = (grupo) => {
   return bd.calificaciones?.[grupo] || {};
 };
 
+export const guardarCalificacionAsignacion = (
+  grupo,
+  estudianteId,
+  parcial,
+  asignacionId,
+  calificacion,
+) => {
+  const bd = obtenerBD();
+  if (!bd.assignment_grades) bd.assignment_grades = {};
+  if (!bd.assignment_grades[grupo]) bd.assignment_grades[grupo] = {};
+  if (!bd.assignment_grades[grupo][estudianteId]) bd.assignment_grades[grupo][estudianteId] = {};
+  if (!bd.assignment_grades[grupo][estudianteId][`parcial_${parcial}`]) {
+    bd.assignment_grades[grupo][estudianteId][`parcial_${parcial}`] = {};
+  }
+
+  bd.assignment_grades[grupo][estudianteId][`parcial_${parcial}`][asignacionId] = calificacion;
+  guardarBD(bd);
+  return { success: true };
+};
+
+export const obtenerCalificacionesAsignaciones = (grupo, estudianteId, parcial) => {
+  const bd = obtenerBD();
+  return (
+    bd.assignment_grades?.[grupo]?.[estudianteId]?.[`parcial_${parcial}`] || {}
+  );
+};
+
 /**
  * Marca actividad como entregada
  */

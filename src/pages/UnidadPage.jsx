@@ -104,7 +104,9 @@ const TextoBloque = ({ texto }) => {
         // ── Cita ──────────────────────────────────────────────
         if (trimmed.startsWith('"') || trimmed.startsWith('"')) {
             const lines = trimmed.split('\n');
-            const fuente = lines.find(l => l.startsWith('Fuente:') || l.startsWith('Al aplicar') === false && l.startsWith('Fuente'));
+            const fuente = lines.find(
+                (l) => l.startsWith('Fuente:') || (!l.startsWith('Al aplicar') && l.startsWith('Fuente')),
+            );
             const cita = lines.filter(l => !l.startsWith('Fuente:')).join(' ').trim();
             return (
                 <blockquote key={i} className="my-4 border-l-4 border-green-500 bg-green-50 rounded-r-2xl px-5 py-4">

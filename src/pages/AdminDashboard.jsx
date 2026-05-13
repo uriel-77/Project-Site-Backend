@@ -8,6 +8,7 @@ import {
 } from '../services/authApi';
 import { cerrarSesion } from '../utils/localStorage';
 import ContentManagementPanel from '../components/ContentManagementPanel';
+import AssignmentGradePanel from '../components/AssignmentGradePanel';
 
 const INITIAL_USER = {
   id: null,
@@ -109,6 +110,7 @@ const AdminDashboard = ({ usuario, onNavigate, onLogout }) => {
       <div className="flex gap-2 border-b border-gray-200">
         {[
           { id: 'usuarios', label: 'Usuarios' },
+          { id: 'calificaciones', label: 'Calificaciones' },
           { id: 'contenidos', label: 'Contenidos' },
         ].map((tab) => (
           <button
@@ -255,6 +257,8 @@ const AdminDashboard = ({ usuario, onNavigate, onLogout }) => {
             </div>
           </div>
         </div>
+      ) : tabActiva === 'calificaciones' ? (
+        <AssignmentGradePanel />
       ) : (
         <ContentManagementPanel roleLabel="Administración" />
       )}

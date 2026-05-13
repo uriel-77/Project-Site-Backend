@@ -17,6 +17,12 @@ import { mockFiles } from './data/mockData';
 import { cerrarSesion, obtenerUsuarioLogueado } from './utils/localStorage';
 import './index.css';
 
+const VISTAS_PANEL = {
+  alumno: 'Panel del Alumno',
+  moderador: 'Panel de Moderación',
+  administrador: 'Panel de Administración',
+};
+
 const PROTECTED_COURSE_VIEWS = new Set([
   'Teoría de la Computación.',
   'Ambientes de Programacion.',
@@ -43,11 +49,11 @@ function App() {
       
       // Redirigir al dashboard correspondiente
       if (usuario.tipo === 'alumno') {
-        setCurrentView('StudentDashboard');
+        setCurrentView(VISTAS_PANEL.alumno);
       } else if (usuario.tipo === 'moderador') {
-        setCurrentView('TeacherDashboard');
+        setCurrentView(VISTAS_PANEL.moderador);
       } else if (usuario.tipo === 'administrador') {
-        setCurrentView('AdminDashboard');
+        setCurrentView(VISTAS_PANEL.administrador);
       }
     }
   }, []);
@@ -70,11 +76,11 @@ function App() {
 
     // Redirigir según tipo
     if (usuario.tipo === 'alumno') {
-      setCurrentView('StudentDashboard');
+      setCurrentView(VISTAS_PANEL.alumno);
     } else if (usuario.tipo === 'moderador') {
-      setCurrentView('TeacherDashboard');
+      setCurrentView(VISTAS_PANEL.moderador);
     } else if (usuario.tipo === 'administrador') {
-      setCurrentView('AdminDashboard');
+      setCurrentView(VISTAS_PANEL.administrador);
     }
   };
 
@@ -141,21 +147,21 @@ function App() {
       case 'Iniciar Sesión':
         return <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />;
 
-      case 'StudentDashboard':
+      case VISTAS_PANEL.alumno:
         return usuarioLogueado ? (
           <StudentDashboard usuario={usuarioLogueado} onNavigate={handleNavigate} onLogout={handleLogout} />
         ) : (
           <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
         );
 
-      case 'TeacherDashboard':
+      case VISTAS_PANEL.moderador:
         return usuarioLogueado && usuarioLogueado.tipo === 'moderador' ? (
           <TeacherDashboard usuario={usuarioLogueado} onNavigate={handleNavigate} onLogout={handleLogout} />
         ) : (
           <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
         );
 
-      case 'AdminDashboard':
+      case VISTAS_PANEL.administrador:
         return usuarioLogueado && usuarioLogueado.tipo === 'administrador' ? (
           <AdminDashboard usuario={usuarioLogueado} onNavigate={handleNavigate} onLogout={handleLogout} />
         ) : (

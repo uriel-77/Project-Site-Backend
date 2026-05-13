@@ -2,6 +2,7 @@ import React from 'react';
 import ChecklistPartial from '../components/ChecklistPartial';
 import { cerrarSesion } from '../utils/localStorage';
 import { fetchAsignaciones } from '../services/contenidoApi';
+import { fetchEntregas } from '../services/evaluacionApi';
 
 function buildChecklist(parcial, asignaciones) {
   return {
@@ -25,22 +26,31 @@ const StudentDashboard = ({ usuario, onNavigate, onLogout }) => {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
   const [asignaciones, setAsignaciones] = React.useState([]);
+  const [entregas, setEntregas] = React.useState([]);
 
   const cargarAsignaciones = React.useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      const data = await fetchAsignaciones({
-        periodo: parcialActivo,
-        grupo: usuario?.grupo || undefined,
-      });
-      setAsignaciones(data.filter((item) => item.activa));
+      const [asignacionesData, entregasData] = await Promise.all([
+        fetchAsignaciones({
+          periodo: parcialActivo,
+          grupo: usuario?.grupo || undefined,
+        }),
+        fetchEntregas({
+          parcial: parcialActivo,
+          grupo: usuario?.grupo || undefined,
+          alumnoId: usuario?.id,
+        }),
+      ]);
+      setAsignaciones(asignacionesData.filter((item) => item.activa));
+      setEntregas(entregasData);
     } catch (loadError) {
       setError(loadError.message || 'No fue posible cargar tus asignaciones.');
     } finally {
       setLoading(false);
     }
-  }, [parcialActivo, usuario?.grupo]);
+  }, [parcialActivo, usuario?.grupo, usuario?.id]);
 
   React.useEffect(() => {
     cargarAsignaciones();
@@ -59,7 +69,7 @@ const StudentDashboard = ({ usuario, onNavigate, onLogout }) => {
       <div className="bg-gradient-to-r from-[#6b2132] to-[#1f4f46] text-white p-8 rounded-xl mb-8 shadow-lg">
         <div className="flex justify-between items-start gap-4">
           <div>
-            <h1 className="text-4xl font-bold mb-2">Dashboard del alumno</h1>
+            <h1 className="text-4xl font-bold mb-2">Panel del alumno</h1>
             <p className="text-lg opacity-90">
               {usuario?.nombre} {usuario?.apellido}
             </p>
@@ -117,6 +127,8 @@ const StudentDashboard = ({ usuario, onNavigate, onLogout }) => {
             parcial={parcialActivo}
             grupo={usuario?.grupo}
             estudianteId={usuario?.id}
+            entregas={entregas}
+            onArchivoSubido={cargarAsignaciones}
           />
         )}
       </div>

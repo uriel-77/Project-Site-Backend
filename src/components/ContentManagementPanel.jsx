@@ -135,6 +135,10 @@ function mapUnitList(unidades) {
   );
 }
 
+function sortUnits(unidades) {
+  return [...unidades].sort((a, b) => a.unidad.unidad_id - b.unidad.unidad_id);
+}
+
 const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
   const [selectedCourse, setSelectedCourse] = React.useState(COURSE_OPTIONS[0][0]);
   const [loading, setLoading] = React.useState(false);
@@ -195,25 +199,27 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
       if (unitDraft.id) {
         const updated = await actualizarUnidad(unitDraft.id, unitDraft.nombre);
         setUnidades((current) =>
-          current.map((item) =>
+          sortUnits(current.map((item) =>
             item.unidad.unidad_id === updated.id
               ? { ...item, unidad: { unidad_id: updated.id, nombre: updated.nombre } }
               : item,
-          ),
+          )),
         );
         showSuccess('Unidad actualizada.');
       } else {
         const created = await crearUnidad(unitDraft.nombre);
-        setUnidades((current) => [
-          ...current,
-          {
-            unidad: {
-              unidad_id: created.id,
-              nombre: created.nombre,
+        setUnidades((current) =>
+          sortUnits([
+            ...current,
+            {
+              unidad: {
+                unidad_id: created.id,
+                nombre: created.nombre,
+              },
+              contenidos: [],
             },
-            contenidos: [],
-          },
-        ]);
+          ]),
+        );
         showSuccess('Unidad creada.');
       }
       setUnitDraft({ id: null, nombre: '' });
