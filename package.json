@@ -16,6 +16,7 @@
     "start:api": "node server.js",
     "build": "react-scripts build",
     "serve": "NODE_ENV=production node server.js",
+    "serve:local": "node server.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "postinstall": "chmod +x node_modules/.bin/react-scripts || true"
