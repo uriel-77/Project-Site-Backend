@@ -15,7 +15,7 @@ export class EvaluacionResolver {
 
   @Query(() => [Entrega], { name: 'entregas' })
   entregas(
-    @Args('grupo', { nullable: true }) grupo: string | undefined,
+    @Args('grupo', { type: () => String, nullable: true }) grupo: string | undefined,
     @Args('parcial', { type: () => Int, nullable: true }) parcial: number | undefined,
     @Args('alumnoId', { type: () => Int, nullable: true }) alumnoId: number | undefined,
     @Args('asignacionId', { type: () => Int, nullable: true }) asignacionId: number | undefined,
@@ -35,7 +35,7 @@ export class EvaluacionResolver {
 
   @Query(() => [CalificacionAsignacion], { name: 'calificacionesAsignacion' })
   calificacionesAsignacion(
-    @Args('grupo', { nullable: true }) grupo: string | undefined,
+    @Args('grupo', { type: () => String, nullable: true }) grupo: string | undefined,
     @Args('parcial', { type: () => Int, nullable: true }) parcial: number | undefined,
     @Args('alumnoId', { type: () => Int, nullable: true }) alumnoId: number | undefined,
     @Args('asignacionId', { type: () => Int, nullable: true }) asignacionId: number | undefined,

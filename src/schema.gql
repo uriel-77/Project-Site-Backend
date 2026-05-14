@@ -34,6 +34,17 @@ type AuthPayload {
   usuario: Alumno!
 }
 
+type CalificacionAsignacion {
+  alumnoId: Int!
+  asignacionId: Int!
+  calificacion: Int!
+  fechaCalificacion: String!
+  grupo: String!
+  id: ID!
+  observaciones: String
+  parcial: Int!
+}
+
 type Contenido {
   asignaciones: [Asignacion!]
   contenido: [String!]!
@@ -106,9 +117,32 @@ input CreateVideoInput {
   youtubeUrl: String!
 }
 
+type Entrega {
+  alumnoId: Int!
+  archivoBase64: String!
+  asignacionId: Int!
+  estado: String!
+  fechaEntrega: String!
+  grupo: String!
+  id: ID!
+  mimeType: String!
+  nombreArchivo: String!
+  parcial: Int!
+  tamano: Int!
+}
+
 enum EstadoUsuario {
   ACTIVO
   INACTIVO
+}
+
+input GuardarCalificacionAsignacionInput {
+  alumnoId: Int!
+  asignacionId: Int!
+  calificacion: Int!
+  grupo: String!
+  observaciones: String
+  parcial: Int!
 }
 
 type Insignia {
@@ -141,14 +175,18 @@ type Mutation {
   eliminarUnidad(id: Int!): Unidad!
   eliminarUsuario(id: Int!): Alumno!
   eliminarVideo(id: Int!): Video!
+  guardarCalificacionAsignacion(datos: GuardarCalificacionAsignacionInput!): CalificacionAsignacion!
   iniciarSesion(datos: LoginAlumnoInput!): AuthPayload!
+  registrarEntrega(datos: RegistrarEntregaInput!): Entrega!
 }
 
 type Query {
   asignacion(id: Int!): Asignacion
   asignaciones(contenidoId: Int, grupo: String, periodo: Int): [Asignacion!]!
+  calificacionesAsignacion(alumnoId: Int, asignacionId: Int, grupo: String, parcial: Int): [CalificacionAsignacion!]!
   contenido(id: Int!): Contenido
   contenidos(tipoMateria: TipoMateria): [Contenido!]!
+  entregas(alumnoId: Int, asignacionId: Int, grupo: String, parcial: Int): [Entrega!]!
   grupos: [String!]!
   insignias: [Insignia!]!
   rubricasPorPeriodo(periodo: Int!): [Rubrica!]!
@@ -157,6 +195,17 @@ type Query {
   usuarios: [Alumno!]!
   video(id: Int!): Video
   videos(asignacionId: Int, contenidoId: Int, publicado: Boolean): [Video!]!
+}
+
+input RegistrarEntregaInput {
+  alumnoId: Int!
+  archivoBase64: String!
+  asignacionId: Int!
+  grupo: String!
+  mimeType: String!
+  nombreArchivo: String!
+  parcial: Int!
+  tamano: Int!
 }
 
 enum RolUsuario {
