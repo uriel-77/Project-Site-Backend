@@ -1,6 +1,8 @@
 // components/FileUpload.jsx
 import React, { useState } from 'react';
 
+const MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024;
+
 const FileUpload = ({ onFileSelect, actividadId, onSubmit }) => {
   const [archivo, setArchivo] = useState(null);
   const [cargando, setCargando] = useState(false);
@@ -19,9 +21,9 @@ const FileUpload = ({ onFileSelect, actividadId, onSubmit }) => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validar tamaño máximo (10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        alert('El archivo es demasiado grande (máximo 10 MB)');
+      // El archivo viaja como base64 dentro de GraphQL, así que el payload real crece.
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        alert('El archivo es demasiado grande (máximo 8 MB para entrega en plataforma)');
         return;
       }
 
@@ -65,7 +67,10 @@ const FileUpload = ({ onFileSelect, actividadId, onSubmit }) => {
       setArchivo(null);
       document.getElementById(`file-input-${actividadId}`).value = '';
     } catch (error) {
-      alert(error.message || 'No fue posible subir el archivo.');
+      alert(
+        error.message ||
+          'No fue posible subir el archivo. Verifica que no exceda el limite y vuelve a intentar.',
+      );
     } finally {
       setCargando(false);
     }

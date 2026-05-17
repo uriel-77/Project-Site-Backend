@@ -24,6 +24,11 @@ async function graphqlRequest(query, variables) {
   });
 
   if (!response.ok) {
+    if (response.status === 413) {
+      throw new Error(
+        'El archivo excede el limite permitido por el servidor. Reduce el tamano e intenta de nuevo.',
+      );
+    }
     throw new Error(`Error HTTP ${response.status}`);
   }
 

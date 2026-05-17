@@ -51,6 +51,15 @@ async function graphqlRequest(query, variables) {
   return payload.data;
 }
 
+function omitNilId(payload) {
+  if (!payload || payload.id === undefined || payload.id === null || payload.id === '') {
+    const { id, ...rest } = payload || {};
+    return rest;
+  }
+
+  return payload;
+}
+
 function mapVideo(video) {
   return {
     id: video.id,
@@ -324,7 +333,7 @@ export async function crearContenido(payload) {
         }
       }
     `,
-    { datos: payload },
+    { datos: omitNilId(payload) },
   );
 
   return data.crearContenido;
@@ -371,7 +380,7 @@ export async function crearVideo(payload) {
     `,
     {
       datos: {
-        ...payload,
+        ...omitNilId(payload),
         contenidoId: payload.contenidoId ? Number(payload.contenidoId) : null,
         asignacionIds: (payload.asignacionIds || []).map(Number),
       },
