@@ -323,6 +323,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async createUnidad(data?: any) {
+    await this.syncTableSequence('"Unidad"');
     return this.queryOne('INSERT INTO "Unidad" (nombre) VALUES ($1) RETURNING id, nombre', [data?.nombre]);
   }
 
@@ -679,6 +680,19 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     return this.queryOne(
       `UPDATE ${tableName} SET ${sets.join(', ')} WHERE id = $${params.length} ${returning}`,
       params,
+    );
+  }
+
+  private async syncTableSequence(tableName: string) {
+    await this.pool.query(
+      `
+        SELECT setval(
+          pg_get_serial_sequence($1, 'id'),
+          COALESCE((SELECT MAX(id) + 1 FROM ${tableName}), 1),
+          false
+        )
+      `,
+      [tableName],
     );
   }
 
