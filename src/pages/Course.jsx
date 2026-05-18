@@ -240,7 +240,7 @@ const Course = ({ courseName, currentPeriod, onPeriodChange }) => {
             </p>
             <div className="aspect-video bg-gray-100 rounded mb-3">
               <iframe
-                src={documents.introEvaluacion}
+                src="https://www.youtube.com/embed/pv8lCZRJdHE?si=SvC0PygZ2hZ-ip3D"
                 className="w-full h-full rounded"
                 title="Video introductorio"
                 allowFullScreen
