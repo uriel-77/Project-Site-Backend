@@ -35,7 +35,7 @@ const Home = ({ onNavigate, usuarioLogueado }) => {
           </h3>
           <div className="aspect-video bg-gray-200 rounded-lg overflow-hidden">
             <iframe
-              src="https://www.youtube.com/embed/dummy"
+              src="https://youtu.be/pv8lCZRJdHE?si=r6-FBLML-nSe4PmC"
               className="w-full h-full"
               title="Video introductorio"
               allowFullScreen
