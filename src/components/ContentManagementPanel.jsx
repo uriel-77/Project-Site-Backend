@@ -524,6 +524,17 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
         <form onSubmit={handleContentSubmit} className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
           <h3 className="text-lg font-bold text-gray-900">Tema</h3>
           <select
+            value={selectedCourse}
+            onChange={(event) => setSelectedCourse(event.target.value)}
+            className="w-full rounded-lg border border-gray-300 px-4 py-2"
+          >
+            {COURSE_OPTIONS.map(([course]) => (
+              <option key={course} value={course}>
+                Materia: {course}
+              </option>
+            ))}
+          </select>
+          <select
             value={contentDraft.unidadId}
             onChange={(event) => setContentDraft({ ...contentDraft, unidadId: event.target.value })}
             className="w-full rounded-lg border border-gray-300 px-4 py-2"
@@ -599,6 +610,17 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
       <div className="grid gap-6 lg:grid-cols-2">
         <form onSubmit={handleVideoSubmit} className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
           <h3 className="text-lg font-bold text-gray-900">Video de YouTube</h3>
+          <select
+            value={selectedCourse}
+            onChange={(event) => setSelectedCourse(event.target.value)}
+            className="w-full rounded-lg border border-gray-300 px-4 py-2"
+          >
+            {COURSE_OPTIONS.map(([course]) => (
+              <option key={course} value={course}>
+                Materia: {course}
+              </option>
+            ))}
+          </select>
           <select
             value={videoDraft.unidadId}
             onChange={(event) =>
@@ -693,6 +715,17 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
           className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4"
         >
           <h3 className="text-lg font-bold text-gray-900">Asignación dinámica</h3>
+          <select
+            value={selectedCourse}
+            onChange={(event) => setSelectedCourse(event.target.value)}
+            className="w-full rounded-lg border border-gray-300 px-4 py-2"
+          >
+            {COURSE_OPTIONS.map(([course]) => (
+              <option key={course} value={course}>
+                Materia: {course}
+              </option>
+            ))}
+          </select>
           <select
             value={assignmentDraft.unidadId}
             onChange={(event) =>
