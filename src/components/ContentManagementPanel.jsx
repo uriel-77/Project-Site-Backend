@@ -164,6 +164,7 @@ function sortContents(contenidos) {
 
 const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
   const [selectedCourse, setSelectedCourse] = React.useState(COURSE_OPTIONS[0][0]);
+  const [selectedUnitFilter, setSelectedUnitFilter] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
   const [success, setSuccess] = React.useState('');
@@ -178,6 +179,13 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
   const opcionesUnidad = React.useMemo(
     () => unidades.map(({ unidad }) => unidad),
     [unidades],
+  );
+  const unidadesFiltradas = React.useMemo(
+    () =>
+      selectedUnitFilter
+        ? unidades.filter(({ unidad }) => Number(unidad.unidad_id) === Number(selectedUnitFilter))
+        : unidades,
+    [selectedUnitFilter, unidades],
   );
   const contenidos = React.useMemo(
     () => (catalogoContenidos.length ? sortContents(catalogoContenidos) : sortContents(mapUnitList(unidades))),
@@ -265,6 +273,7 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
   }, [cargarContenido]);
 
   React.useEffect(() => {
+    setSelectedUnitFilter('');
     setUnitDraft({ id: null, nombre: '' });
     setContentDraft(INITIAL_CONTENT);
     setVideoDraft(INITIAL_VIDEO);
@@ -452,17 +461,31 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
               Gestiona unidades, temas, videos de YouTube y asignaciones vinculadas.
             </p>
           </div>
-          <select
-            value={selectedCourse}
-            onChange={(event) => setSelectedCourse(event.target.value)}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm"
-          >
-            {COURSE_OPTIONS.map(([course]) => (
-              <option key={course} value={course}>
-                {course}
-              </option>
-            ))}
-          </select>
+          <div className="grid gap-3 md:grid-cols-2">
+            <select
+              value={selectedCourse}
+              onChange={(event) => setSelectedCourse(event.target.value)}
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm"
+            >
+              {COURSE_OPTIONS.map(([course]) => (
+                <option key={course} value={course}>
+                  {course}
+                </option>
+              ))}
+            </select>
+            <select
+              value={selectedUnitFilter}
+              onChange={(event) => setSelectedUnitFilter(event.target.value)}
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm"
+            >
+              <option value="">Todas las unidades de {selectedCourse}</option>
+              {opcionesUnidad.map((unidad) => (
+                <option key={unidad.unidad_id} value={unidad.unidad_id}>
+                  {unidad.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
         {success && (
@@ -590,11 +613,15 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
             required
           >
             <option value="">Selecciona una unidad</option>
-            {opcionesUnidad.map((unidad) => (
+            {opcionesUnidad
+              .filter((unidad) =>
+                selectedUnitFilter ? Number(unidad.unidad_id) === Number(selectedUnitFilter) : true,
+              )
+              .map((unidad) => (
               <option key={unidad.unidad_id} value={unidad.unidad_id}>
                 {unidad.nombre}
               </option>
-            ))}
+              ))}
           </select>
           <select
             value={videoDraft.contenidoId}
@@ -680,11 +707,15 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
             required
           >
             <option value="">Selecciona una unidad</option>
-            {opcionesUnidad.map((unidad) => (
+            {opcionesUnidad
+              .filter((unidad) =>
+                selectedUnitFilter ? Number(unidad.unidad_id) === Number(selectedUnitFilter) : true,
+              )
+              .map((unidad) => (
               <option key={unidad.unidad_id} value={unidad.unidad_id}>
                 {unidad.nombre}
               </option>
-            ))}
+              ))}
           </select>
           <select
             value={assignmentDraft.contenidoId}
@@ -803,7 +834,7 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
           <p className="mt-4 text-sm text-gray-500">Cargando contenidos...</p>
         ) : (
           <div className="mt-6 space-y-6">
-            {unidades.map(({ unidad, contenidos: contenidosUnidad }) => (
+            {unidadesFiltradas.map(({ unidad, contenidos: contenidosUnidad }) => (
               <div key={unidad.unidad_id} className="rounded-2xl border border-gray-200 p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
