@@ -185,15 +185,19 @@ const Sidebar = ({
             </>
           )}
 
-          <div className="px-4 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-            General
-          </div>
-          {renderNavItems(
-            generalPages,
-            currentView,
-            handleNavigation,
-            'bg-gray-900 border-l-4 border-gray-500 text-white',
-            'text-gray-300 hover:bg-gray-800',
+          {usuarioLogueado && (
+            <>
+              <div className="px-4 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                General
+              </div>
+              {renderNavItems(
+                generalPages,
+                currentView,
+                handleNavigation,
+                'bg-gray-900 border-l-4 border-gray-500 text-white',
+                'text-gray-300 hover:bg-gray-800',
+              )}
+            </>
           )}
         </nav>
 
