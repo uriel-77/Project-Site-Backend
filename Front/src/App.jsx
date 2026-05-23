@@ -1,4 +1,3 @@
-// App.jsx
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -41,13 +40,10 @@ function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [usuarioLogueado, setUsuarioLogueado] = useState(null);
 
-  // Verificar si hay usuario logueado al cargar
   useEffect(() => {
     const usuario = obtenerUsuarioLogueado();
     if (usuario) {
       setUsuarioLogueado(usuario);
-      
-      // Redirigir al dashboard correspondiente
       if (usuario.tipo === 'alumno') {
         setCurrentView(VISTAS_PANEL.alumno);
       } else if (usuario.tipo === 'moderador') {
@@ -73,8 +69,6 @@ function App() {
 
   const handleLoginSuccess = (usuario) => {
     setUsuarioLogueado(usuario);
-
-    // Redirigir según tipo
     if (usuario.tipo === 'alumno') {
       setCurrentView(VISTAS_PANEL.alumno);
     } else if (usuario.tipo === 'moderador') {
@@ -95,7 +89,6 @@ function App() {
       setCurrentView('Iniciar Sesión');
       return;
     }
-
     setCurrentView(view);
   };
 
@@ -103,27 +96,16 @@ function App() {
     switch (currentView) {
       case 'Inicio':
         return <Home onNavigate={handleNavigate} usuarioLogueado={usuarioLogueado} />;
-
       case 'Teoría de la Computación.':
         return usuarioLogueado ? (
-          <Course
-            courseName={currentView}
-            currentPeriod={currentPeriod}
-            onPeriodChange={setCurrentPeriod}
-          />
+          <Course courseName={currentView} currentPeriod={currentPeriod} onPeriodChange={setCurrentPeriod} />
         ) : (
           <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
         );
-
-      // Las demás materias usan el componente genérico
       case 'Ambientes de Programacion.':
       case 'Compiladores':
         return usuarioLogueado ? (
-          <Course
-            courseName={currentView}
-            currentPeriod={currentPeriod}
-            onPeriodChange={setCurrentPeriod}
-          />
+          <Course courseName={currentView} currentPeriod={currentPeriod} onPeriodChange={setCurrentPeriod} />
         ) : (
           <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
         );
@@ -136,52 +118,42 @@ function App() {
         ) : (
           <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
         );
-
       case 'Contacto':
         return <Contact />;
-
       case 'Registrarse':
         return <Register onNavigate={handleNavigate} />;
-
       case 'Iniciar Sesión':
         return <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />;
-      
       case 'Editar Perfil':
         return usuarioLogueado ? (
           <EditProfile usuario={usuarioLogueado} onNavigate={handleNavigate} />
         ) : (
           <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
         );
-
       case VISTAS_PANEL.alumno:
         return usuarioLogueado ? (
           <StudentDashboard usuario={usuarioLogueado} onNavigate={handleNavigate} onLogout={handleLogout} />
         ) : (
           <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
         );
-
       case VISTAS_PANEL.moderador:
         return usuarioLogueado && usuarioLogueado.tipo === 'moderador' ? (
           <TeacherDashboard usuario={usuarioLogueado} onNavigate={handleNavigate} onLogout={handleLogout} />
         ) : (
           <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
         );
-
       case VISTAS_PANEL.administrador:
         return usuarioLogueado && usuarioLogueado.tipo === 'administrador' ? (
           <AdminDashboard usuario={usuarioLogueado} onNavigate={handleNavigate} onLogout={handleLogout} />
         ) : (
           <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
         );
-
       case 'Presentaciones':
       case 'Sobre Mi':
       case 'Tesis':
         return <GenericPage pageName={currentView} />;
-
       case 'Resultados':
         return <SearchResults query={searchQuery} files={mockFiles} />;
-
       default:
         return <Home onNavigate={handleNavigate} usuarioLogueado={usuarioLogueado} />;
     }
@@ -202,7 +174,6 @@ function App() {
         usuarioLogueado={usuarioLogueado}
         onLogout={handleLogout}
       />
-
       <main className="flex-1 flex flex-col relative min-w-0 bg-gray-50">
         <Header
           title={currentView}
@@ -210,7 +181,6 @@ function App() {
           onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           usuarioLogueado={usuarioLogueado}
         />
-
         <div id="contentArea" className="flex-1 overflow-y-auto p-6 md:p-8">
           {renderContent()}
         </div>

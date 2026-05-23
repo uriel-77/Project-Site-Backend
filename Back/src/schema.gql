@@ -179,6 +179,12 @@ type Mutation {
   guardarCalificacionAsignacion(datos: GuardarCalificacionAsignacionInput!): CalificacionAsignacion!
   iniciarSesion(datos: LoginAlumnoInput!): AuthPayload!
   registrarEntrega(datos: RegistrarEntregaInput!): Entrega!
+
+  """Valida el código y actualiza la contraseña"""
+  restablecerPassword(datos: RestablecerPasswordInput!): Boolean!
+
+  """Genera un código y lo envía por correo"""
+  solicitarRecuperacionPassword(datos: SolicitarRecuperacionInput!): Boolean!
 }
 
 type Query {
@@ -190,6 +196,7 @@ type Query {
   entregas(alumnoId: Int, asignacionId: Int, grupo: String, parcial: Int): [Entrega!]!
   grupos: [String!]!
   insignias: [Insignia!]!
+  ping: String!
   rubricasPorPeriodo(periodo: Int!): [Rubrica!]!
   unidad(id: Int!): Unidad
   unidades(tipoMateria: TipoMateria): [Unidad!]!
@@ -209,6 +216,12 @@ input RegistrarEntregaInput {
   tamano: Int!
 }
 
+input RestablecerPasswordInput {
+  codigo: String!
+  email: String!
+  nuevoPassword: String!
+}
+
 enum RolUsuario {
   ADMINISTRADOR
   ALUMNO
@@ -221,6 +234,10 @@ type Rubrica {
   periodo: Int!
   titulo: String!
   url: String!
+}
+
+input SolicitarRecuperacionInput {
+  email: String!
 }
 
 enum TipoContenido {
