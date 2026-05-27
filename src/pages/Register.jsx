@@ -14,11 +14,21 @@ const Register = ({ onNavigate }) => {
 
   const [grupos, setGrupos] = React.useState([]);
   const [error, setError] = React.useState('');
-  const [cargando, setCargando] = React.useState(false);
+  // 👇 AQUÍ ESTABA EL ERROR DE DEDO, YA ESTÁ CORREGIDO 👇
+  const [cargando, setCargando] = React.useState(false); 
+  
+  // Estados para los ojitos
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
 
   React.useEffect(() => {
     setGrupos(GRUPOS_DISPONIBLES);
   }, []);
+
+  // Refrescamos iconos cada que cambian las contraseñas
+  React.useEffect(() => {
+    if (window.lucide) window.lucide.createIcons();
+  }, [showPassword, showConfirmPassword]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -34,42 +44,12 @@ const Register = ({ onNavigate }) => {
     setCargando(true);
     setError('');
 
-    // Validaciones
-    if (!formData.nombre.trim()) {
-      setError('El nombre es requerido');
-      setCargando(false);
-      return;
-    }
-
-    if (!formData.apellido.trim()) {
-      setError('El apellido es requerido');
-      setCargando(false);
-      return;
-    }
-
-    if (!formData.email.includes('@')) {
-      setError('Ingresa un email válido');
-      setCargando(false);
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
-      setCargando(false);
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden');
-      setCargando(false);
-      return;
-    }
-
-    if (!formData.grupo) {
-      setError('Debe seleccionar un grupo');
-      setCargando(false);
-      return;
-    }
+    if (!formData.nombre.trim()) { setError('El nombre es requerido'); setCargando(false); return; }
+    if (!formData.apellido.trim()) { setError('El apellido es requerido'); setCargando(false); return; }
+    if (!formData.email.includes('@')) { setError('Ingresa un email válido'); setCargando(false); return; }
+    if (formData.password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres'); setCargando(false); return; }
+    if (formData.password !== formData.confirmPassword) { setError('Las contraseñas no coinciden'); setCargando(false); return; }
+    if (!formData.grupo) { setError('Debe seleccionar un grupo'); setCargando(false); return; }
 
     try {
       await registrarAlumno({
@@ -102,122 +82,71 @@ const Register = ({ onNavigate }) => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Campo Nombre */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Nombre
-            </label>
-            <input
-              type="text"
-              name="nombre"
-              value={formData.nombre}
-              onChange={handleInputChange}
-              placeholder="Ingresa tu nombre"
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6b2132] transition"
-            />
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Nombre</label>
+            <input type="text" name="nombre" value={formData.nombre} onChange={handleInputChange} placeholder="Ingresa tu nombre" required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6b2132] transition" />
           </div>
 
-          {/* Campo Apellido */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Apellido
-            </label>
-            <input
-              type="text"
-              name="apellido"
-              value={formData.apellido}
-              onChange={handleInputChange}
-              placeholder="Ingresa tu apellido"
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6b2132] transition"
-            />
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Apellido</label>
+            <input type="text" name="apellido" value={formData.apellido} onChange={handleInputChange} placeholder="Ingresa tu apellido" required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6b2132] transition" />
           </div>
 
-          {/* Campo Email */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Correo Electrónico
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="tu@correo.com"
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6b2132] transition"
-            />
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Correo Electrónico</label>
+            <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="tu@correo.com" required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6b2132] transition" />
           </div>
 
-          {/* Campo Contraseña */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Contraseña
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              placeholder="Mínimo 6 caracteres"
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6b2132] transition"
-            />
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Contraseña</label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                placeholder="Mínimo 6 caracteres"
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6b2132] transition pr-10"
+              />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                <i data-lucide={showPassword ? "eye-off" : "eye"} className="w-5 h-5"></i>
+              </button>
+            </div>
           </div>
 
-          {/* Campo Confirmar Contraseña */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Confirmar Contraseña
-            </label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleInputChange}
-              placeholder="Repite tu contraseña"
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6b2132] transition"
-            />
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Confirmar Contraseña</label>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                placeholder="Repite tu contraseña"
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6b2132] transition pr-10"
+              />
+              <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                <i data-lucide={showConfirmPassword ? "eye-off" : "eye"} className="w-5 h-5"></i>
+              </button>
+            </div>
           </div>
 
-          {/* Campo Grupo */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Grupo / Secuencia
-            </label>
-            <select
-              name="grupo"
-              value={formData.grupo}
-              onChange={handleInputChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6b2132] transition"
-            >
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Grupo / Secuencia</label>
+            <select name="grupo" value={formData.grupo} onChange={handleInputChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6b2132] transition">
               <option value="">Selecciona tu grupo</option>
-              {grupos.map((grupo) => (
-                <option key={grupo} value={grupo}>
-                  {grupo}
-                </option>
-              ))}
+              {grupos.map((grupo) => <option key={grupo} value={grupo}>{grupo}</option>)}
             </select>
           </div>
 
-          {/* Botones */}
           <div className="flex gap-3 mt-6">
-            <button
-              type="submit"
-              disabled={cargando}
-              className="flex-1 bg-[#6b2132] text-white py-2 rounded-lg font-semibold hover:bg-opacity-90 disabled:bg-gray-400 transition flex items-center justify-center gap-2"
-            >
+            <button type="submit" disabled={cargando} className="flex-1 bg-[#6b2132] text-white py-2 rounded-lg font-semibold hover:bg-opacity-90 disabled:bg-gray-400 transition flex items-center justify-center gap-2">
               <i data-lucide="user-check" className="w-5 h-5"></i>
               {cargando ? 'Registrando...' : 'Registrarse'}
             </button>
-            <button
-              type="button"
-              onClick={() => onNavigate('Inicio')}
-              className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg font-semibold hover:bg-gray-300 transition flex items-center justify-center gap-2"
-            >
+            <button type="button" onClick={() => onNavigate('Inicio')} className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg font-semibold hover:bg-gray-300 transition flex items-center justify-center gap-2">
               <i data-lucide="home" className="w-5 h-5"></i>
               Volver
             </button>

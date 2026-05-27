@@ -84,12 +84,21 @@ const StudentDashboard = ({ usuario, onNavigate, onLogout }) => {
               </span>
             </div>
           </div>
-          <button
-            onClick={handleCerrarSesion}
-            className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition"
-          >
-            Cerrar sesión
-          </button>
+          <div className="flex gap-3 mt-4 sm:mt-0">
+            <button
+              onClick={() => onNavigate('Editar Perfil')}
+              className="bg-white/20 text-white px-4 py-2 rounded-lg hover:bg-white/30 transition flex items-center justify-center gap-2 font-medium"
+            >
+              <i data-lucide="user-cog" className="w-4 h-4"></i>
+              Editar Perfil
+            </button>
+            <button
+              onClick={handleCerrarSesion}
+              className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition"
+            >
+              Cerrar sesión
+            </button>
+          </div>
         </div>
       </div>
 
