@@ -48,9 +48,9 @@ export class AlumnoResolver {
     return this.alumnoService.createUsuario(datos);
   }
 
-  @Mutation(() => Alumno, { name: 'actualizarUsuario' })
-  actualizarUsuario(@Args('datos') datos: UpdateUsuarioInput, @Context() context: any) {
-    this.alumnoService.requireRoles(context, [RolUsuario.ADMINISTRADOR]);
+  @Mutation(() => Alumno, { name: 'actualizarMiPerfil' })
+  actualizarMiPerfil(@Args('datos') datos: UpdateUsuarioInput, @Context() context: any) {
+    this.alumnoService.requireRoles(context, [RolUsuario.ALUMNO, RolUsuario.MODERADOR, RolUsuario.ADMINISTRADOR]);
     return this.alumnoService.updateUsuario(datos);
   }
 

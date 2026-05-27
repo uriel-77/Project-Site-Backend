@@ -103,6 +103,31 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
       ),
   };
 
+  readonly verificationCode = {
+    create: async ({ data }: QueryArgs) => {
+      return this.queryOne(
+        `INSERT INTO "VerificationCode" (id, code, "expiresAt", "alumnoId")
+         VALUES (gen_random_uuid()::text, $1, $2, $3)
+         RETURNING *`,
+        [data?.code, data?.expiresAt, data?.alumnoId]
+      );
+    },
+    findFirst: async ({ where }: QueryArgs) => {
+      return this.queryOne(
+        `SELECT * FROM "VerificationCode" 
+         WHERE "alumnoId" = $1 AND code = $2 
+         ORDER BY "createdAt" DESC LIMIT 1`,
+        [where?.alumnoId, where?.code]
+      );
+    },
+    deleteMany: async ({ where }: QueryArgs) => {
+      return this.queryRows(
+        `DELETE FROM "VerificationCode" WHERE "alumnoId" = $1`,
+        [where?.alumnoId]
+      );
+    }
+  };
+  
   async onModuleInit() {
     await this.ensureCoreSchema();
     await this.ensureDefaultUsuarios();
@@ -1006,6 +1031,17 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
         "fechaCalificacion" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         UNIQUE ("asignacionId", "alumnoId", parcial)
       )
+    `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS "VerificationCode" (
+        id TEXT PRIMARY KEY,
+        code TEXT NOT NULL,
+        "createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        "expiresAt" TIMESTAMPTZ NOT NULL,
+        "alumnoId" INTEGER NOT NULL REFERENCES "Alumno"(id) ON DELETE CASCADE
+      );
+      CREATE INDEX IF NOT EXISTS "VerificationCode_alumnoId_idx" ON "VerificationCode"("alumnoId");
     `);
   }
 

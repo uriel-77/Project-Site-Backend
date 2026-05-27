@@ -57,6 +57,7 @@ model Alumno {
   password String  @default("")
   rol      String  @default("ALUMNO")
   estado   String  @default("ACTIVO")
+  verificationCodes VerificationCode[]
 }
 
 model Unidad {
@@ -133,4 +134,15 @@ model Rubrica {
   criterios String
   url       String
   periodo   Int
+}
+
+model VerificationCode {
+  id        String   @id @default(uuid())
+  code      String   
+  createdAt DateTime @default(now())
+  expiresAt DateTime 
+  alumnoId  Int
+  alumno    Alumno   @relation(fields: [alumnoId], references: [id], onDelete: Cascade)
+
+  @@index([alumnoId])
 }
