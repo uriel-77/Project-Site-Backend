@@ -89,6 +89,21 @@ const ImageBloque = ({ url, figureNum }) => {
     );
 };
 
+// ── Helper: renderiza negritas **texto** e itálicas *texto* dentro de un string ─
+const renderInline = (text) => {
+    // Procesa **negrita** y *itálica* alternadamente
+    const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
+    return parts.map((part, i) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+            return <strong key={i} className="font-semibold text-gray-900">{part.slice(2, -2)}</strong>;
+        }
+        if (part.startsWith('*') && part.endsWith('*')) {
+            return <em key={i}>{part.slice(1, -1)}</em>;
+        }
+        return part;
+    });
+};
+
 // ── Bloque: Texto (párrafos, citas, bullets, títulos internos) ────────────────
 const TextoBloque = ({ texto }) => {
     const { ref, visible } = useFadeIn();
@@ -101,8 +116,40 @@ const TextoBloque = ({ texto }) => {
         const trimmed = para.trim();
         if (!trimmed) return null;
 
-        // ── Cita ──────────────────────────────────────────────
-        if (trimmed.startsWith('"') || trimmed.startsWith('"')) {
+        // ── Encabezado Markdown: ## Título o ### Título ───────────────────────
+        if (/^#{1,3} /.test(trimmed)) {
+            const level = trimmed.match(/^(#{1,3}) /)[1].length;
+            const title = trimmed.replace(/^#{1,3} /, '').trim();
+            const styles = [
+                'text-xl font-bold text-green-900 mt-8 mb-3 pb-1 border-b border-green-100',
+                'text-base font-bold text-green-800 mt-6 mb-2 flex items-center gap-2',
+                'text-sm font-bold text-green-700 mt-4 mb-1 uppercase tracking-wide',
+            ][level - 1];
+            return (
+                <div key={i} className={styles}>
+                    {level === 2 && <span className="w-1 h-5 bg-green-400 rounded-full inline-block shrink-0" />}
+                    {renderInline(title)}
+                </div>
+            );
+        }
+
+        // ── Separador horizontal: --- ─────────────────────────────────────────
+        if (/^-{3,}$/.test(trimmed)) {
+            return <hr key={i} className="my-6 border-gray-200" />;
+        }
+
+        // ── Cita Markdown: > texto ────────────────────────────────────────────
+        if (trimmed.startsWith('> ') || trimmed.startsWith('>')) {
+            const citaText = trimmed.replace(/^> ?/gm, '').trim();
+            return (
+                <blockquote key={i} className="my-4 border-l-4 border-green-500 bg-green-50 rounded-r-2xl px-5 py-4">
+                    <p className="text-gray-700 italic text-sm leading-relaxed">{renderInline(citaText)}</p>
+                </blockquote>
+            );
+        }
+
+        // ── Cita estilo original: empieza con " ───────────────────────────────
+        if (trimmed.startsWith('"') || trimmed.startsWith('\u201c')) {
             const lines = trimmed.split('\n');
             const fuente = lines.find(
                 (l) => l.startsWith('Fuente:') || (!l.startsWith('Al aplicar') && l.startsWith('Fuente')),
@@ -120,17 +167,66 @@ const TextoBloque = ({ texto }) => {
             );
         }
 
-        // ── Bullets ───────────────────────────────────────────
-        if (hasBullets(trimmed)) {
+        // ── Lista ordenada Markdown: 1. item ──────────────────────────────────
+        if (/^\d+\. /.test(trimmed)) {
+            const lines = trimmed.split('\n').filter(Boolean);
+            const titleLines = [];
+            const listLines = [];
+            let inList = false;
+
+            lines.forEach(line => {
+                if (/^\d+\. /.test(line.trim())) {
+                    inList = true;
+                    listLines.push(line.replace(/^\d+\. /, '').trim());
+                } else if (!inList) {
+                    titleLines.push(line.trim());
+                } else {
+                    // línea de continuación del ítem anterior
+                    if (listLines.length > 0) {
+                        listLines[listLines.length - 1] += ' ' + line.trim();
+                    }
+                }
+            });
+
+            return (
+                <div key={i} className="my-4">
+                    {titleLines.length > 0 && (
+                        <p className="font-semibold text-gray-800 text-sm mb-3">{renderInline(titleLines.join(' '))}</p>
+                    )}
+                    <ol className="space-y-2.5 list-none">
+                        {listLines.map((item, li) => {
+                            const colonIdx = item.indexOf(':');
+                            const hasTerm = colonIdx > 0 && colonIdx < 40 && /\*\*/.test(item.slice(0, colonIdx + 1));
+                            return (
+                                <li key={li} className="flex gap-3 items-start bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-100">
+                                    <span className="shrink-0 w-6 h-6 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center mt-0.5">
+                                        {li + 1}
+                                    </span>
+                                    <span className="text-gray-700 text-sm leading-relaxed">{renderInline(item)}</span>
+                                </li>
+                            );
+                        })}
+                    </ol>
+                </div>
+            );
+        }
+
+        // ── Bullets Markdown (- item) o estilo original (• – \t) ─────────────
+        const isMarkdownBullet = /^[\-\*] /.test(trimmed) || trimmed.split('\n').some(l => /^[\-\*] /.test(l.trim()));
+        if (isMarkdownBullet || hasBullets(trimmed)) {
             const lines = trimmed.split('\n').filter(Boolean);
             const titleLines = [];
             const bulletLines = [];
             let inBullets = false;
 
             lines.forEach(line => {
-                if (/^[\t ]*[•\-–]/.test(line) || (/^\t/.test(line) && inBullets)) {
+                const isMdBullet = /^[\-\*] /.test(line.trim());
+                const isOldBullet = /^[\t ]*[•\-–]/.test(line) || (/^\t/.test(line) && inBullets);
+                if (isMdBullet || isOldBullet) {
                     inBullets = true;
-                    bulletLines.push(line.replace(/^[\t ]*[•\-–]\s*/, '').replace(/^\t/, '').trim());
+                    bulletLines.push(
+                        line.replace(/^[\-\*] /, '').replace(/^[\t ]*[•\-–]\s*/, '').replace(/^\t/, '').trim()
+                    );
                 } else if (!inBullets) {
                     titleLines.push(line.trim());
                 }
@@ -139,11 +235,10 @@ const TextoBloque = ({ texto }) => {
             return (
                 <div key={i} className="my-4">
                     {titleLines.length > 0 && (
-                        <p className="font-semibold text-gray-800 text-sm mb-3">{titleLines.join(' ')}</p>
+                        <p className="font-semibold text-gray-800 text-sm mb-3">{renderInline(titleLines.join(' '))}</p>
                     )}
                     <ul className="space-y-2.5">
                         {bulletLines.map((b, bi) => {
-                            // Detecta "Término: descripción"
                             const colonIdx = b.indexOf(':');
                             const hasTerm = colonIdx > 0 && colonIdx < 30;
                             return (
@@ -153,9 +248,9 @@ const TextoBloque = ({ texto }) => {
                                         {hasTerm ? (
                                             <>
                                                 <strong className="text-gray-900">{b.slice(0, colonIdx + 1)}</strong>
-                                                {b.slice(colonIdx + 1)}
+                                                {renderInline(b.slice(colonIdx + 1))}
                                             </>
-                                        ) : b}
+                                        ) : renderInline(b)}
                                     </span>
                                 </li>
                             );
@@ -180,9 +275,9 @@ const TextoBloque = ({ texto }) => {
                 <div key={i} className="my-5">
                     <h3 className="text-base font-bold text-green-800 mb-1.5 flex items-center gap-2">
                         <span className="w-1 h-5 bg-green-400 rounded-full inline-block" />
-                        {firstLine}
+                        {renderInline(firstLine)}
                     </h3>
-                    {rest && <p className="text-gray-700 text-sm leading-relaxed pl-3">{rest}</p>}
+                    {rest && <p className="text-gray-700 text-sm leading-relaxed pl-3">{renderInline(rest)}</p>}
                 </div>
             );
         }
@@ -190,7 +285,7 @@ const TextoBloque = ({ texto }) => {
         // ── Párrafo normal ────────────────────────────────────
         return (
             <p key={i} className="text-gray-700 text-sm leading-relaxed my-3">
-                {trimmed.split('\n').join(' ')}
+                {renderInline(trimmed.split('\n').join(' '))}
             </p>
         );
     };
