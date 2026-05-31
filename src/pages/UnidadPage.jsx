@@ -116,19 +116,25 @@ const TextoBloque = ({ texto }) => {
         const trimmed = para.trim();
         if (!trimmed) return null;
 
-        // ── Encabezado Markdown: ## Título o ### Título ───────────────────────
+        // ── Encabezado Markdown: ## Título (solo o con contenido debajo) ────────
         if (/^#{1,3} /.test(trimmed)) {
-            const level = trimmed.match(/^(#{1,3}) /)[1].length;
-            const title = trimmed.replace(/^#{1,3} /, '').trim();
+            const firstNewline = trimmed.indexOf('\n');
+            const titleLine = firstNewline === -1 ? trimmed : trimmed.slice(0, firstNewline);
+            const restText = firstNewline === -1 ? '' : trimmed.slice(firstNewline + 1).trim();
+            const level = titleLine.match(/^(#{1,3}) /)[1].length;
+            const title = titleLine.replace(/^#{1,3} /, '').trim();
             const styles = [
                 'text-xl font-bold text-green-900 mt-8 mb-3 pb-1 border-b border-green-100',
                 'text-base font-bold text-green-800 mt-6 mb-2 flex items-center gap-2',
                 'text-sm font-bold text-green-700 mt-4 mb-1 uppercase tracking-wide',
             ][level - 1];
             return (
-                <div key={i} className={styles}>
-                    {level === 2 && <span className="w-1 h-5 bg-green-400 rounded-full inline-block shrink-0" />}
-                    {renderInline(title)}
+                <div key={i}>
+                    <div className={styles}>
+                        {level === 2 && <span className="w-1 h-5 bg-green-400 rounded-full inline-block shrink-0" />}
+                        {renderInline(title)}
+                    </div>
+                    {restText && renderParagraph(restText, `${i}-body`)}
                 </div>
             );
         }
@@ -232,10 +238,20 @@ const TextoBloque = ({ texto }) => {
                 }
             });
 
+            const titleText = titleLines.join(' ').trim();
+            const isSectionTitle = titleText.length > 0 && titleText === titleText.toUpperCase() && titleText.length < 60;
+
             return (
                 <div key={i} className="my-4">
-                    {titleLines.length > 0 && (
-                        <p className="font-semibold text-gray-800 text-sm mb-3">{renderInline(titleLines.join(' '))}</p>
+                    {titleText && (
+                        isSectionTitle ? (
+                            <h3 className="text-base font-bold text-green-800 mb-3 flex items-center gap-2">
+                                <span className="w-1 h-5 bg-green-400 rounded-full inline-block shrink-0" />
+                                {titleText}
+                            </h3>
+                        ) : (
+                            <p className="font-semibold text-gray-800 text-sm mb-3">{renderInline(titleText)}</p>
+                        )
                     )}
                     <ul className="space-y-2.5">
                         {bulletLines.map((b, bi) => {
@@ -264,11 +280,12 @@ const TextoBloque = ({ texto }) => {
         const lines = trimmed.split('\n');
         const firstLine = lines[0].trim();
         const rest = lines.slice(1).join(' ').trim();
+        const isAllCaps = firstLine === firstLine.toUpperCase() && /[A-ZÁÉÍÓÚÑ]{3,}/.test(firstLine);
         const looksLikeTitle =
             firstLine.length < 80 &&
             !firstLine.endsWith('.') &&
             !firstLine.endsWith(',') &&
-            rest.length > 20;
+            (rest.length > 0 || isAllCaps);
 
         if (looksLikeTitle) {
             return (
