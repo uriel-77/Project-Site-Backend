@@ -13,6 +13,7 @@ import TeacherDashboard from './pages/TeacherDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import GenericPage from './pages/GenericPage';
 import SearchResults from './pages/SearchResults';
+import JflapTutorialPage from './pages/JflapTutorialPage';
 import { mockFiles } from './data/mockData';
 import { cerrarSesion, obtenerUsuarioLogueado } from './utils/localStorage';
 import './index.css';
@@ -96,16 +97,20 @@ function App() {
     switch (currentView) {
       case 'Inicio':
         return <Home onNavigate={handleNavigate} usuarioLogueado={usuarioLogueado} />;
+      case 'Tutorial JFLAP':
+        return <JflapTutorialPage onNavigate={handleNavigate} />;
       case 'Teoría de la Computación.':
         return usuarioLogueado ? (
-          <Course courseName={currentView} currentPeriod={currentPeriod} onPeriodChange={setCurrentPeriod} />
+          <Course courseName={currentView} currentPeriod={currentPeriod} onPeriodChange={setCurrentPeriod} 
+          onNavigate={handleNavigate} />
         ) : (
           <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
         );
       case 'Ambientes de Programacion.':
       case 'Compiladores':
         return usuarioLogueado ? (
-          <Course courseName={currentView} currentPeriod={currentPeriod} onPeriodChange={setCurrentPeriod} />
+          <Course courseName={currentView} currentPeriod={currentPeriod} onPeriodChange={setCurrentPeriod} 
+          onNavigate={handleNavigate} />
         ) : (
           <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
         );

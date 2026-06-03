@@ -5,7 +5,7 @@ import { COURSE_TO_TIPO_MATERIA, fetchUnidadesPorMateria } from '../services/con
 
 const asset = (fileName) => `/${encodeURI(fileName)}`;
 
-const Course = ({ courseName, currentPeriod, onPeriodChange }) => {
+const Course = ({ courseName, currentPeriod, onPeriodChange, onNavigate }) => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [leccionActiva, setLeccionActiva] = useState(null);
   const [unidades, setUnidades] = useState([]);
@@ -302,7 +302,26 @@ const Course = ({ courseName, currentPeriod, onPeriodChange }) => {
           </div>
         </div>
 
-
+        {/* Tutorial JFLAP */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
+          <div className="bg-blue-600 h-2"></div>
+          <div className="p-5">
+            <h3 className="font-bold text-gray-800 flex items-center gap-2 mb-2">
+              <i data-lucide="wrench" className="text-blue-600 w-5 h-5"></i>
+              Software JFLAP
+            </h3>
+            <p className="text-xs text-gray-500 mb-3">
+              Tutorial de instalación para Windows y Linux.
+            </p>
+            <button
+              onClick={() => onNavigate('Tutorial JFLAP')}
+              className="inline-flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-800 text-sm px-4 py-2 rounded-lg w-full justify-center"
+            >
+              <i data-lucide="external-link" className="w-4 h-4"></i>
+              Ir al Tutorial
+            </button>
+          </div>
+        </div>
 
         {/* Guías de Estudio */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
