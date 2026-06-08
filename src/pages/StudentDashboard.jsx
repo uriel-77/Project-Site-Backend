@@ -56,6 +56,13 @@ const StudentDashboard = ({ usuario, onNavigate, onLogout }) => {
     cargarAsignaciones();
   }, [cargarAsignaciones]);
 
+  // Efecto crucial para renderizar los iconos globales (i) cuando cambia la vista responsiva
+  React.useEffect(() => {
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+  }, [parcialActivo, asignaciones]);
+
   const handleCerrarSesion = () => {
     cerrarSesion();
     if (onLogout) onLogout();
@@ -65,11 +72,13 @@ const StudentDashboard = ({ usuario, onNavigate, onLogout }) => {
   const checklist = buildChecklist(parcialActivo, asignaciones);
 
   return (
-    <div className="max-w-6xl mx-auto fade-in">
-      <div className="bg-gradient-to-r from-[#6b2132] to-[#1f4f46] text-white p-8 rounded-xl mb-8 shadow-lg">
-        <div className="flex justify-between items-start gap-4">
+    <div className="max-w-6xl mx-auto fade-in p-4 md:p-0">
+      {/* Contenedor del Banner con ajuste responsivo */}
+      <div className="bg-gradient-to-r from-[#6b2132] to-[#1f4f46] text-white p-6 md:p-8 rounded-xl mb-8 shadow-lg">
+        {/* Cambia a flex-col en móviles y flex-row en pantallas sm o superiores */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
           <div>
-            <h1 className="text-4xl font-bold mb-2">Panel del alumno</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">Panel del alumno</h1>
             <p className="text-lg opacity-90">
               {usuario?.nombre} {usuario?.apellido}
             </p>
@@ -84,17 +93,19 @@ const StudentDashboard = ({ usuario, onNavigate, onLogout }) => {
               </span>
             </div>
           </div>
-          <div className="flex gap-3 mt-4 sm:mt-0">
+          
+          {/* Botonera con flex-wrap y anchos responsivos para evitar que se desborde horizontalmente */}
+          <div className="flex flex-wrap sm:flex-nowrap gap-3 w-full sm:w-auto mt-2 sm:mt-0">
             <button
               onClick={() => onNavigate('Editar Perfil')}
-              className="bg-white/20 text-white px-4 py-2 rounded-lg hover:bg-white/30 transition flex items-center justify-center gap-2 font-medium"
+              className="flex-1 sm:flex-none bg-white/20 text-white px-4 py-2 rounded-lg hover:bg-white/30 transition flex items-center justify-center gap-2 font-medium whitespace-nowrap"
             >
               <i data-lucide="user-cog" className="w-4 h-4"></i>
               Editar Perfil
             </button>
             <button
               onClick={handleCerrarSesion}
-              className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition"
+              className="flex-1 sm:flex-none bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition text-center whitespace-nowrap font-medium"
             >
               Cerrar sesión
             </button>
@@ -102,13 +113,14 @@ const StudentDashboard = ({ usuario, onNavigate, onLogout }) => {
         </div>
       </div>
 
+      {/* Pestañas de los Parciales con overflow-x-auto por seguridad en móviles */}
       <div className="mb-8">
-        <div className="flex gap-4 border-b border-gray-200">
+        <div className="flex gap-4 border-b border-gray-200 overflow-x-auto pb-1">
           {[1, 2, 3].map((parcial) => (
             <button
               key={parcial}
               onClick={() => setParcialActivo(parcial)}
-              className={`px-6 py-3 font-semibold transition-all border-b-4 ${
+              className={`px-6 py-3 font-semibold transition-all border-b-4 whitespace-nowrap ${
                 parcialActivo === parcial
                   ? 'border-[#6b2132] text-[#6b2132]'
                   : 'border-transparent text-gray-600 hover:text-gray-800'
@@ -120,7 +132,7 @@ const StudentDashboard = ({ usuario, onNavigate, onLogout }) => {
         </div>
       </div>
 
-      <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+      <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-200">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">{checklist.nombre}</h2>
           <p className="text-gray-600">{checklist.descripcion}</p>
