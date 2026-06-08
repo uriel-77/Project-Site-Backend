@@ -52,7 +52,8 @@ async function graphqlRequest(query, variables, options = {}) {
   });
 
   if (!response.ok) {
-    throw new Error(`Error HTTP ${response.status}`);
+    const errorBody = await response.json().catch(() => ({})); 
+    throw new Error(errorBody.errors?.[0]?.message || `Error HTTP ${response.status}`);
   }
 
   const payload = await response.json();
@@ -203,7 +204,7 @@ export async function actualizarUsuario(payload) {
   const passwordSeguro = payload.password ? await encryptPassword(payload.password) : undefined;
   const data = await graphqlRequest(
     `
-      mutation ActualizarUsuario($datos: UpdateUsuarioInput!) {
+      mutation ActualizarUsuario($datos: UpdateUsuarioAdminInput!) {
         actualizarUsuario(datos: $datos) {
           id
           nombre
@@ -221,10 +222,10 @@ export async function actualizarUsuario(payload) {
         nombre: payload.nombre,
         apellido: payload.apellido,
         email: payload.email,
-        password: passwordSeguro,
         grupo: payload.grupo || '',
-        rol: payload.tipo ? toBackendRole(payload.tipo) : undefined,
-        estado: payload.estado ? toBackendStatus(payload.estado) : undefined,
+        rol: payload.rol, 
+        estado: payload.estado,
+        ...(passwordSeguro && { password: passwordSeguro })
       },
     },
   );
