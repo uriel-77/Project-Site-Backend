@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { guardarUsuarioLogueado, obtenerSesionAuth } from '../utils/localStorage';
 
 const EditProfile = ({ usuario, onNavigate }) => {
@@ -12,11 +12,28 @@ const EditProfile = ({ usuario, onNavigate }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+  }, [showPassword]);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  // Función clave para reciclar el componente entre Alumnos y Moderadores
+  const obtenerDestinoPanel = () => {
+    if (usuario?.tipo === 'moderador' || usuario?.tipo === 'docente') {
+      return 'Panel de Moderación';
+    }
+    if (usuario?.tipo === 'administrador') {
+      return 'Panel de Administración';
+    }
+    return 'Panel del Alumno';
   };
 
   const handleSubmit = async (e) => {
@@ -37,7 +54,6 @@ const EditProfile = ({ usuario, onNavigate }) => {
         email: formData.email.toLowerCase().trim(),
       };
 
-      // Solo mandamos la contraseña si el compa escribió algo
       if (formData.password.trim() !== '') {
         variablesInput.password = formData.password;
       }
@@ -81,7 +97,8 @@ const EditProfile = ({ usuario, onNavigate }) => {
       
       guardarUsuarioLogueado(usuarioActualizado); 
 
-      onNavigate('Panel del Alumno');
+      // Redirección dinámica basada en el rol del usuario logueado
+      onNavigate(obtenerDestinoPanel());
       window.location.reload(); 
       
     } catch (error) {
@@ -134,7 +151,7 @@ const EditProfile = ({ usuario, onNavigate }) => {
         <div className="flex justify-between items-center pt-4 border-t border-gray-100 mt-6">
           <button 
             type="button"
-            onClick={() => onNavigate('Panel del Alumno')} 
+            onClick={() => onNavigate(obtenerDestinoPanel())} 
             className="text-gray-600 hover:text-gray-800 font-medium flex items-center gap-2 transition-colors"
           >
             <i data-lucide="arrow-left" className="w-4 h-4"></i>
