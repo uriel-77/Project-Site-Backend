@@ -54,9 +54,9 @@ export class EvaluacionResolver {
   }
 
   @Mutation(() => Entrega, { name: 'registrarEntrega' })
-  registrarEntrega(@Args('datos') datos: RegistrarEntregaInput, @Context() context: any) {
+  async registrarEntrega(@Args('datos') datos: RegistrarEntregaInput, @Context() context: any) {
     const usuario = this.alumnoService.getSessionUserFromContext(context);
-    return this.evaluacionService.registrarEntrega(datos, usuario);
+    return await this.evaluacionService.registrarEntrega(datos, usuario);
   }
 
   @Mutation(() => CalificacionAsignacion, { name: 'guardarCalificacionAsignacion' })
