@@ -67,4 +67,12 @@ export class EvaluacionResolver {
     this.alumnoService.requireRoles(context, [RolUsuario.MODERADOR, RolUsuario.ADMINISTRADOR]);
     return this.evaluacionService.guardarCalificacion(datos);
   }
+
+  @Mutation(() => Boolean, { name: 'devolverEntrega' })
+  async devolverEntrega(
+    @Args('alumnoId', { type: () => Int }) alumnoId: number,
+    @Args('asignacionId', { type: () => Int }) asignacionId: number,
+  ) {
+    return await this.evaluacionService.devolverEntrega(alumnoId, asignacionId);
+  }
 }

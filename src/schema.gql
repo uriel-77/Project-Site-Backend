@@ -183,6 +183,7 @@ type Mutation {
   crearUnidad(createUnidadInput: CreateUnidadInput!): Unidad!
   crearUsuario(datos: CreateUsuarioInput!): Alumno!
   crearVideo(datos: CreateVideoInput!): Video!
+  devolverEntrega(alumnoId: Int!, asignacionId: Int!): Boolean!
   eliminarAsignacion(id: Int!): Asignacion!
   eliminarContenido(id: Int!): Contenido!
   eliminarUnidad(id: Int!): Unidad!

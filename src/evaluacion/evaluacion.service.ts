@@ -16,19 +16,22 @@ export class EvaluacionService {
 
     const alumnoId = Number(datos.alumnoId);
     const asignacionId = Number(datos.asignacionId);
-    const nombreArchivo = (datos as any).nombreArchivo.replace(/'/g, "''");
-    const mimeType = (datos as any).mimeType;
-    const tamano = Number((datos as any).tamano || 0);
-    const archivoBase64 = (datos as any).archivoBase64;
+    
+    const nombreArchivo = datos.nombreArchivo ? datos.nombreArchivo.replace(/'/g, "''") : '';
+    const mimeType = datos.mimeType || '';
+    const tamano = Number(datos.tamano || 0);
+    const archivoBase64 = datos.archivoBase64 || '';
 
-    const existe = await (this.prisma as any).queryOne(`
+    const resultado = await (this.prisma as any).queryOne(`
       SELECT id FROM "Entrega" 
       WHERE "asignacionId" = ${asignacionId} AND "alumnoId" = ${alumnoId}
     `);
 
+    const existeId = Array.isArray(resultado) ? resultado[0]?.id : resultado?.id;
+
     let query = '';
     
-    if (existe) {
+    if (existeId) {
       query = `
         UPDATE "Entrega" 
         SET "nombreArchivo" = '${nombreArchivo}', 
@@ -36,7 +39,7 @@ export class EvaluacionService {
             "tamano" = ${tamano}, 
             "archivoBase64" = '${archivoBase64}', 
             "entregadoEn" = NOW()
-        WHERE id = ${existe.id}
+        WHERE id = ${existeId}
         RETURNING id, "asignacionId", "alumnoId", "nombreArchivo", "mimeType", "tamano"
       `;
     } else {
@@ -60,6 +63,10 @@ export class EvaluacionService {
         e."asignacionId",
         e."entregadoEn",
         e.calificacion,
+        e."nombreArchivo",
+        e."mimeType",
+        e."tamano",
+        e."archivoBase64",
         a.grupo,
         a.periodo AS parcial
       FROM "Entrega" e
@@ -73,7 +80,6 @@ export class EvaluacionService {
       query += ` AND e."alumnoId" = ${Number(alumnoId)}`;
     }
 
-    // Filtros dinámicos que vienen del frontend
     if (grupo && grupo !== 'Todos') {
       query += ` AND a.grupo = '${grupo}'`;
     }
@@ -104,5 +110,18 @@ export class EvaluacionService {
     }
 
     return this.prisma.calificacionAsignacion.findMany({ where: filtros });
+  }
+
+  async devolverEntrega(alumnoId: number, asignacionId: number): Promise<boolean> {
+    try {
+      await (this.prisma as any).queryOne(`
+        DELETE FROM "Entrega" 
+        WHERE "alumnoId" = ${alumnoId} AND "asignacionId" = ${asignacionId}
+      `);
+      return true;
+    } catch (error) {
+      console.error('Error al devolver la entrega:', error);
+      throw new Error('No se pudo devolver la asignación en la base de datos.');
+    }
   }
 }

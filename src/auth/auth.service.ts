@@ -83,7 +83,8 @@ export class AuthService {
     if (datos.estado !== undefined) updateData.estado = datos.estado;
 
     if (datos.password && datos.password.trim() !== '') {
-      updateData.password = hashPassword(datos.password.trim());
+      const passwordPlano = decodeIncomingPassword(datos.password.trim());
+      updateData.password = hashPassword(passwordPlano);
     }
 
     return this.prisma.alumno.update({
