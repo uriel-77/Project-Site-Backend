@@ -10,6 +10,7 @@ import {
 import { cerrarSesion } from '../utils/localStorage';
 import ContentManagementPanel from '../components/ContentManagementPanel';
 import AssignmentGradePanel from '../components/AssignmentGradePanel';
+import StudentAnalyticsPanel from '../pages/StudentAnalyticsPanel';
 
 const INITIAL_USER = {
   id: null,
@@ -174,6 +175,7 @@ const AdminDashboard = ({ usuario, onNavigate, onLogout }) => {
           { id: 'usuarios', label: 'Usuarios' },
           { id: 'calificaciones', label: 'Calificaciones' },
           { id: 'contenidos', label: 'Contenidos' },
+          { id: 'analiticas', label: 'Analíticas' },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -445,9 +447,11 @@ const AdminDashboard = ({ usuario, onNavigate, onLogout }) => {
         </div>
       ) : tabActiva === 'calificaciones' ? (
         <AssignmentGradePanel />
+      ) : tabActiva === 'analiticas' ? (
+        <StudentAnalyticsPanel />
       ) : (
         <ContentManagementPanel roleLabel="Administración" />
-      )}
+)}
     </div>
   );
 };

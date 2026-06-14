@@ -49,23 +49,21 @@ export async function registrarEntrega(payload) {
           id
           asignacionId
           alumnoId
-          grupo
-          parcial
           nombreArchivo
           mimeType
           tamano
-          estado
-          fechaEntrega
+          entregadoEn
         }
       }
     `,
     {
       datos: {
-        ...payload,
         asignacionId: Number(payload.asignacionId),
         alumnoId: Number(payload.alumnoId),
-        parcial: Number(payload.parcial),
+        nombreArchivo: payload.nombreArchivo,
+        mimeType: payload.mimeType,
         tamano: Number(payload.tamano || 0),
+        archivoBase64: payload.archivoBase64,
       },
     },
   );
@@ -73,25 +71,23 @@ export async function registrarEntrega(payload) {
   return data.registrarEntrega;
 }
 
-export async function fetchEntregas({ grupo, parcial, alumnoId, asignacionId } = {}) {
+export async function fetchEntregas({ alumnoId, asignacionId } = {}) {
   const data = await graphqlRequest(
     `
-      query Entregas($grupo: String, $parcial: Int, $alumnoId: Int, $asignacionId: Int) {
-        entregas(grupo: $grupo, parcial: $parcial, alumnoId: $alumnoId, asignacionId: $asignacionId) {
+      query Entregas($alumnoId: Int, $asignacionId: Int) {
+        entregas(alumnoId: $alumnoId, asignacionId: $asignacionId) {
           id
           asignacionId
           alumnoId
-          grupo
-          parcial
           nombreArchivo
           mimeType
           tamano
-          estado
-          fechaEntrega
+          entregadoEn
+          calificacion
         }
       }
     `,
-    { grupo, parcial, alumnoId, asignacionId },
+    { alumnoId, asignacionId },
   );
 
   return data.entregas || [];
@@ -157,4 +153,22 @@ export async function fetchCalificacionesAsignacion({
   );
 
   return data.calificacionesAsignacion || [];
+}
+
+export async function fetchKpisGrupo(grupo) {
+  const data = await graphqlRequest(
+    `
+      query GetKpisGrupo($grupo: String!) {
+        getKpisGrupo(grupo: $grupo) {
+          totalAlumnos
+          entregasRealizadas
+          tasaCumplimiento
+          alumnosEnRiesgo
+        }
+      }
+    `,
+    { grupo },
+  );
+
+  return data.getKpisGrupo;
 }

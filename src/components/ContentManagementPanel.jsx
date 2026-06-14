@@ -383,23 +383,34 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
   const handleAssignmentSubmit = async (event) => {
     event.preventDefault();
     resetMessages();
-    try {
-      const { unidadId, ...assignmentPayload } = assignmentDraft;
-      const payload = {
-        ...assignmentPayload,
-        contenidoId: Number(assignmentDraft.contenidoId),
-      };
+    
+    // 1. Excluimos explícitamente los campos que GraphQL rechaza en la creación
+    const { id, unidadId, videoIds, ...datosLimpios } = assignmentDraft;
+    
+    // 2. Construimos el payload limpio asegurando los tipos de datos numéricos
+    const payload = {
+      ...datosLimpios,
+      periodo: Number(datosLimpios.periodo || 1),
+      porcentaje: Number(datosLimpios.porcentaje || 0),
+      orden: Number(datosLimpios.orden || 1),
+      contenidoId: Number(datosLimpios.contenidoId),
+      grupo: datosLimpios.grupo || ""
+    };
 
-      if (assignmentDraft.id) {
-        await actualizarAsignacion(payload);
+    try {
+      if (id) {
+        // Actualización
+        await actualizarAsignacion({ ...payload, id: Number(id) });
         showSuccess('Asignación actualizada.');
       } else {
+        // Creación pura (Sin ID ni videoIds en el objeto)
         await crearAsignacion(payload);
         showSuccess('Asignación creada.');
       }
       setAssignmentDraft(INITIAL_ASSIGNMENT);
       await cargarContenido();
     } catch (submitError) {
+      console.error("Error al guardar asignación:", submitError);
       setError(submitError.message || 'No fue posible guardar la asignación.');
     }
   };

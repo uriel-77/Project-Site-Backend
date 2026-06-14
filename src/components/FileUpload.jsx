@@ -1,11 +1,20 @@
 // components/FileUpload.jsx
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 const MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024;
 
 const FileUpload = ({ onFileSelect, actividadId, onSubmit }) => {
   const [archivo, setArchivo] = useState(null);
   const [cargando, setCargando] = useState(false);
+  const [arrastrando, setArrastrando] = useState(false);
+  
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+  }, [archivo, arrastrando]);
 
   const leerComoBase64 = (file) =>
     new Promise((resolve, reject) => {
@@ -18,27 +27,66 @@ const FileUpload = ({ onFileSelect, actividadId, onSubmit }) => {
       reader.readAsDataURL(file);
     });
 
+  // Función unificada para validar peso y tipo de archivo, compartida por Click y Drop
+  const validarYAsignarArchivo = (file) => {
+    if (!file) return;
+
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      alert('El archivo es demasiado grande (máximo 8 MB para entrega en plataforma)');
+      return;
+    }
+
+    const tiposPermitidos = [
+      'application/pdf', 
+      'application/msword', 
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
+      'application/vnd.ms-excel', 
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
+      'application/zip', 
+      'text/plain', 
+      'image/jpeg', 
+      'image/png'
+    ];
+    
+    if (!tiposPermitidos.includes(file.type)) {
+      alert('Tipo de archivo no permitido. Tipos válidos: PDF, Word, Excel, ZIP, TXT, JPG, PNG');
+      return;
+    }
+
+    setArchivo(file);
+    if (onFileSelect) {
+      onFileSelect(file);
+    }
+  };
+
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // El archivo viaja como base64 dentro de GraphQL, así que el payload real crece.
-      if (file.size > MAX_FILE_SIZE_BYTES) {
-        alert('El archivo es demasiado grande (máximo 8 MB para entrega en plataforma)');
-        return;
-      }
+    validarYAsignarArchivo(e.target.files[0]);
+  };
 
-      // Validar tipo de archivo
-      const tiposPermitidos = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/zip', 'text/plain', 'image/jpeg', 'image/png'];
-      
-      if (!tiposPermitidos.includes(file.type)) {
-        alert('Tipo de archivo no permitido. Tipos válidos: PDF, Word, Excel, ZIP, TXT, JPG, PNG');
-        return;
-      }
+  // --- DRAG AND DROP ---
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setArrastrando(true);
+  };
 
-      setArchivo(file);
-      if (onFileSelect) {
-        onFileSelect(file);
-      }
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setArrastrando(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setArrastrando(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      validarYAsignarArchivo(e.dataTransfer.files[0]); // Procesa el archivo soltado
+    }
+  };
+
+  const handleLimpiarArchivo = () => {
+    setArchivo(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -64,8 +112,7 @@ const FileUpload = ({ onFileSelect, actividadId, onSubmit }) => {
           actividadId,
         );
       }
-      setArchivo(null);
-      document.getElementById(`file-input-${actividadId}`).value = '';
+      handleLimpiarArchivo();
     } catch (error) {
       alert(
         error.message ||
@@ -81,18 +128,31 @@ const FileUpload = ({ onFileSelect, actividadId, onSubmit }) => {
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="flex items-center gap-3">
           <label htmlFor={`file-input-${actividadId}`} className="flex-1 cursor-pointer">
-            <div className="flex items-center justify-center w-full px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#6b2132] transition">
-              <div className="flex items-center gap-2">
+            
+            {/* AREA DROPZONE INTERACTIVA */}
+            <div 
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`flex items-center justify-center w-full px-4 py-4 border-2 border-dashed rounded-lg transition-all ${
+                arrastrando 
+                  ? 'border-[#6b2132] bg-rose-50/50 scale-[1.01]' 
+                  : 'border-gray-300 hover:border-[#6b2132] bg-white'
+              }`}
+            >
+              <div className="flex items-center gap-2 pointer-events-none">
                 <i data-lucide="upload" className="w-5 h-5 text-gray-400"></i>
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-gray-600 font-medium">
                   {archivo ? archivo.name : 'Selecciona o arrastra un archivo'}
                 </span>
               </div>
             </div>
+
           </label>
           <input
             id={`file-input-${actividadId}`}
             type="file"
+            ref={fileInputRef}
             onChange={handleFileChange}
             className="hidden"
             accept=".pdf,.doc,.docx,.xls,.xlsx,.zip,.txt,.jpg,.jpeg,.png"
@@ -102,7 +162,7 @@ const FileUpload = ({ onFileSelect, actividadId, onSubmit }) => {
         {archivo && (
           <div className="flex items-center justify-between bg-green-50 p-3 rounded border border-green-200">
             <div className="flex items-center gap-2">
-              <i data-lucide="check-circle" className="w-5 h-5 text-green-600"></i>
+              <span className="text-green-600 font-bold text-lg">✓</span>
               <div>
                 <p className="text-sm font-semibold text-green-800">{archivo.name}</p>
                 <p className="text-xs text-green-600">{(archivo.size / 1024 / 1024).toFixed(2)} MB</p>
@@ -110,13 +170,11 @@ const FileUpload = ({ onFileSelect, actividadId, onSubmit }) => {
             </div>
             <button
               type="button"
-              onClick={() => {
-                setArchivo(null);
-                document.getElementById(`file-input-${actividadId}`).value = '';
-              }}
-              className="text-red-600 hover:text-red-800"
+              onClick={handleLimpiarArchivo}
+              className="text-red-600 hover:text-red-800 font-bold text-xs bg-red-50 hover:bg-red-100 px-2 py-1.5 rounded transition-colors flex items-center gap-1"
+              title="Quitar archivo"
             >
-              <i data-lucide="x" className="w-5 h-5"></i>
+              ✕ Quitar
             </button>
           </div>
         )}

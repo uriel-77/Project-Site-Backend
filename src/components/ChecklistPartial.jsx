@@ -17,8 +17,6 @@ const ChecklistPartial = ({
     await registrarEntrega({
       asignacionId: actividadId,
       alumnoId: estudianteId,
-      grupo,
-      parcial,
       nombreArchivo: archivoPayload.nombreArchivo,
       mimeType: archivoPayload.mimeType,
       tamano: archivoPayload.tamano,
