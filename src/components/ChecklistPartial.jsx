@@ -29,8 +29,11 @@ const ChecklistPartial = ({
   };
 
   const estaEntregada = (actividadId) =>
-    entregas.some((entrega) => Number(entrega.asignacionId) === Number(actividadId));
-
+    entregas.some((entrega) => 
+      Number(entrega.asignacionId) === Number(actividadId) && 
+      entrega.nombreArchivo
+    );
+  
   const calcularPorcentajeTotal = () => {
     return checklist.actividades
       .filter(a => a.entregable)

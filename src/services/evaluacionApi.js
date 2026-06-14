@@ -172,3 +172,36 @@ export async function fetchKpisGrupo(grupo) {
 
   return data.getKpisGrupo;
 }
+
+export async function fetchArchivoEntrega({ alumnoId, asignacionId }) {
+  const data = await graphqlRequest(
+    `
+      query EntregasArchivo($alumnoId: Int, $asignacionId: Int) {
+        entregas(alumnoId: $alumnoId, asignacionId: $asignacionId) {
+          nombreArchivo
+          mimeType
+          archivoBase64
+        }
+      }
+    `,
+    { alumnoId: Number(alumnoId), asignacionId: Number(asignacionId) }
+  );
+
+  return data.entregas?.[0]; // Devolvemos solo el primer match
+}
+
+export async function devolverEntrega(alumnoId, asignacionId) {
+  const data = await graphqlRequest(
+    `
+      mutation DevolverEntrega($alumnoId: Int!, $asignacionId: Int!) {
+        devolverEntrega(alumnoId: $alumnoId, asignacionId: $asignacionId)
+      }
+    `,
+    { 
+      alumnoId: Number(alumnoId), 
+      asignacionId: Number(asignacionId) 
+    }
+  );
+
+  return data.devolverEntrega;
+}

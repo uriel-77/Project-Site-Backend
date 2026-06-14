@@ -32,6 +32,7 @@ const AdminDashboard = ({ usuario, onNavigate, onLogout }) => {
 
   const [filtroRol, setFiltroRol] = React.useState('Todos');
   const [filtroGrupo, setFiltroGrupo] = React.useState('Todos');
+  const [mostrarPassword, setMostrarPassword] = React.useState(false);
 
   const cargarUsuarios = React.useCallback(async () => {
     try {
@@ -45,7 +46,10 @@ const AdminDashboard = ({ usuario, onNavigate, onLogout }) => {
 
   useEffect(() => {
     cargarUsuarios();
-  }, [cargarUsuarios]);
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+  }, [cargarUsuarios], [mostrarPassword]);
 
   const handleCerrarSesion = () => {
     cerrarSesion();
@@ -224,14 +228,24 @@ const AdminDashboard = ({ usuario, onNavigate, onLogout }) => {
                   className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#6b2132] outline-none"
                   required
                 />
-                <input
-                  type="password"
-                  value={draft.password || ''}
-                  onChange={(event) => setDraft({ ...draft, password: event.target.value })}
-                  placeholder={draft.id ? 'Nueva contraseña (opcional)' : 'Contraseña temporal'}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#6b2132] outline-none"
-                  required={!draft.id}
-                />
+                <div className="relative">
+                  <input
+                    type={mostrarPassword ? "text" : "password"}
+                    value={draft.password || ''}
+                    onChange={(event) => setDraft({ ...draft, password: event.target.value })}
+                    placeholder={draft.id ? 'Nueva contraseña (opcional)' : 'Contraseña temporal'}
+                    className="w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 focus:ring-2 focus:ring-[#6b2132] outline-none"
+                    required={!draft.id}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setMostrarPassword(!mostrarPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-[#6b2132] transition-colors"
+                    title={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  >
+                    <i data-lucide={mostrarPassword ? "eye-off" : "eye"} className="w-5 h-5"></i>
+                  </button>
+                </div>
                 
                 {/* COMBOBOX DE GRUPO DINÁMICO */}
                 <select
