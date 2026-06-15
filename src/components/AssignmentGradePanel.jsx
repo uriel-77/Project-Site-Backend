@@ -20,11 +20,13 @@ const AssignmentGradePanel = () => {
   const [calificaciones, setCalificaciones] = React.useState([]);
   const [entregasRegistradas, setEntregasRegistradas] = React.useState([]); 
   const [loading, setLoading] = React.useState(false);
-  const [descargando, setDescargando] = React.useState(false);
   const [error, setError] = React.useState('');
-  
-  // Estado para saber qué input se está guardando y animarlo
   const [guardandoId, setGuardandoId] = React.useState(null); 
+  
+  // Estados para Descarga y Preview
+  const [descargandoId, setDescargandoId] = React.useState(null);
+  const [previewInfo, setPreviewInfo] = React.useState(null); // Contiene los datos del archivo a previsualizar
+  const [cargandoPreviewId, setCargandoPreviewId] = React.useState(null);
 
   const grupos = React.useMemo(() => {
     const unique = new Set(
@@ -103,7 +105,7 @@ const AssignmentGradePanel = () => {
     if (window.lucide) {
       window.lucide.createIcons();
     }
-  }, [alumnosFiltrados, asignaciones, entregasRegistradas]);
+  }, [alumnosFiltrados, asignaciones, entregasRegistradas, previewInfo]);
 
   const obtenerCalificacion = (estudianteId, asignacionId) =>
     calificaciones.find(
@@ -119,7 +121,6 @@ const AssignmentGradePanel = () => {
         Number(item.asignacionId) === Number(asignacionId),
     );
 
-  // SOLO ACTUALIZA EL ESTADO LOCAL MIENTRAS ESCRIBE
   const handleInputChange = (estudianteId, asignacionId, value) => {
     const numericValue = value === '' ? '' : Number(value);
     if (numericValue !== '' && (Number.isNaN(numericValue) || numericValue < 0 || numericValue > 100)) return;
@@ -132,12 +133,10 @@ const AssignmentGradePanel = () => {
     });
   };
 
-  // SE DISPARA AL DAR CLIC AFUERA O DAR ENTER
   const handleSaveGrade = async (estudianteId, asignacionId, value) => {
-    if (value === '') return; // Evitamos mandar vacíos innecesarios
-
+    if (value === '') return; 
     const inputKey = `${estudianteId}-${asignacionId}`;
-    setGuardandoId(inputKey); // Activamos animación de guardado
+    setGuardandoId(inputKey); 
 
     try {
       const calificacionGuardada = await guardarCalificacionAsignacionRemota({
@@ -149,7 +148,6 @@ const AssignmentGradePanel = () => {
         observaciones: '',
       });
 
-      // Refrescamos el estado con lo que devolvió el servidor para asegurar sincronía
       setCalificaciones((actuales) => {
         const sinActual = actuales.filter(
           (item) => !(Number(item.alumnoId) === Number(estudianteId) && Number(item.asignacionId) === Number(asignacionId)),
@@ -157,16 +155,50 @@ const AssignmentGradePanel = () => {
         return [...sinActual, calificacionGuardada];
       });
     } catch (err) {
-      alert('Error al guardar la calificación en el servidor.');
+      alert('Error al guardar la calificación.');
     } finally {
-      // Dejamos el feedback verde por medio segundo y luego lo limpiamos
       setTimeout(() => setGuardandoId(null), 600);
     }
   };
 
+  // Función modificada para procesar el Base64 de forma segura
+  const procesarBase64ParaVista = (mimeType, base64Raw) => {
+    const prefix = `data:${mimeType};base64,`;
+    return base64Raw.startsWith('data:') ? base64Raw : prefix + base64Raw;
+  };
+
+  // NUEVA FUNCIÓN: Cargar la vista previa
+  const handleVerPreview = async (entrega) => {
+    const entregaKey = `${entrega.alumnoId}-${entrega.asignacionId}`;
+    if (cargandoPreviewId === entregaKey) return;
+    
+    setCargandoPreviewId(entregaKey);
+    try {
+      const archivoCompleto = await fetchArchivoEntrega({
+        alumnoId: entrega.alumnoId,
+        asignacionId: entrega.asignacionId
+      });
+
+      if (archivoCompleto && archivoCompleto.archivoBase64) {
+        setPreviewInfo({
+          ...archivoCompleto,
+          srcUrl: procesarBase64ParaVista(archivoCompleto.mimeType, archivoCompleto.archivoBase64)
+        });
+      } else {
+        alert('El archivo no está disponible o está corrupto.');
+      }
+    } catch (err) {
+      alert('Error al cargar la previsualización.');
+    } finally {
+      setCargandoPreviewId(null);
+    }
+  };
+
   const handleDescargarArchivo = async (entrega) => {
-    if (descargando) return;
-    setDescargando(true);
+    const entregaKey = `${entrega.alumnoId}-${entrega.asignacionId}`;
+    if (descargandoId === entregaKey) return;
+    setDescargandoId(entregaKey);
+    
     try {
       const archivoCompleto = await fetchArchivoEntrega({
         alumnoId: entrega.alumnoId,
@@ -175,21 +207,16 @@ const AssignmentGradePanel = () => {
 
       if (archivoCompleto && archivoCompleto.archivoBase64) {
         const link = document.createElement('a');
-        const prefix = `data:${archivoCompleto.mimeType};base64,`;
-        const base64Str = archivoCompleto.archivoBase64.startsWith('data:') 
-          ? archivoCompleto.archivoBase64 
-          : prefix + archivoCompleto.archivoBase64;
-        
-        link.href = base64Str;
-        link.download = archivoCompleto.nombreArchivo || `entrega_alumno_${entrega.alumnoId}`;
+        link.href = procesarBase64ParaVista(archivoCompleto.mimeType, archivoCompleto.archivoBase64);
+        link.download = archivoCompleto.nombreArchivo || `entrega_${entrega.alumnoId}`;
         link.click();
       } else {
         alert('El archivo no está disponible o está corrupto.');
       }
     } catch (err) {
-      alert('Hubo un error de conexión al intentar descargar el archivo.');
+      alert('Hubo un error al intentar descargar el archivo.');
     } finally {
-      setDescargando(false);
+      setDescargandoId(null);
     }
   };
 
@@ -210,12 +237,11 @@ const AssignmentGradePanel = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* HEADER Y FILTROS */}
+    <div className="space-y-6 relative">
       <div className="rounded-2xl border border-gray-200 bg-white p-4 md:p-6 shadow-sm">
         <h2 className="text-lg md:text-xl font-bold text-gray-900">Calificación por asignación</h2>
         <p className="mt-1 text-xs md:text-sm text-gray-500">
-          Busca alumnos, revisa entregas y registra calificaciones. Los cambios se guardan automáticamente al presionar Enter o dar clic fuera.
+          Busca alumnos, previsualiza sus entregas y registra calificaciones al instante.
         </p>
         
         <div className="mt-4 md:mt-6 flex flex-wrap gap-3 md:gap-4">
@@ -275,7 +301,6 @@ const AssignmentGradePanel = () => {
         </div>
       </div>
 
-      {/* CONTENEDOR DE RESULTADOS */}
       {error && <p className="text-sm text-red-700 bg-red-50 p-3 rounded-lg">{error}</p>}
       
       {loading ? (
@@ -307,6 +332,8 @@ const AssignmentGradePanel = () => {
                     const isEntregado = entrega && entrega.nombreArchivo;
                     const inputKey = `${alumno.id}-${asignacion.id}`;
                     const estaGuardando = guardandoId === inputKey;
+                    const estaDescargando = descargandoId === inputKey;
+                    const estaCargandoPreview = cargandoPreviewId === inputKey;
 
                     return (
                       <div key={`mobile-${alumno.id}-${asignacion.id}`} className="bg-gray-50/80 p-3 rounded-lg border border-gray-100 flex flex-col gap-3">
@@ -330,10 +357,13 @@ const AssignmentGradePanel = () => {
                           <div className="flex gap-2">
                             {isEntregado && (
                               <>
-                                <button onClick={() => handleDescargarArchivo(entrega)} disabled={descargando} className={`p-2 rounded-md border transition-colors flex items-center justify-center shadow-sm ${descargando ? 'opacity-50 bg-gray-100 border-gray-200' : 'bg-white border-green-200 text-green-700 hover:bg-green-50'}`}>
-                                  <i data-lucide="download" className="w-4 h-4"></i>
+                                <button onClick={() => handleVerPreview(entrega)} disabled={estaCargandoPreview} title="Ver previa" className="p-2 rounded-md bg-white border border-blue-200 text-blue-600 shadow-sm hover:bg-blue-50 transition-colors">
+                                  <i data-lucide={estaCargandoPreview ? "loader-2" : "eye"} className={`w-4 h-4 ${estaCargandoPreview ? "animate-spin" : ""}`}></i>
                                 </button>
-                                <button onClick={() => handleDevolverEntrega(entrega)} className="p-2 rounded-md bg-white border border-red-200 text-red-600 shadow-sm hover:bg-red-50 transition-colors flex items-center justify-center">
+                                <button onClick={() => handleDescargarArchivo(entrega)} disabled={estaDescargando} title="Descargar" className="p-2 rounded-md bg-white border border-green-200 text-green-700 shadow-sm hover:bg-green-50 transition-colors">
+                                  <i data-lucide={estaDescargando ? "loader-2" : "download"} className={`w-4 h-4 ${estaDescargando ? "animate-spin" : ""}`}></i>
+                                </button>
+                                <button onClick={() => handleDevolverEntrega(entrega)} title="Devolver" className="p-2 rounded-md bg-white border border-red-200 text-red-600 shadow-sm hover:bg-red-50 transition-colors">
                                   <i data-lucide="rotate-ccw" className="w-4 h-4"></i>
                                 </button>
                               </>
@@ -350,9 +380,7 @@ const AssignmentGradePanel = () => {
                               onBlur={(event) => handleSaveGrade(alumno.id, asignacion.id, event.target.value)}
                               onKeyDown={(event) => { if (event.key === 'Enter') event.target.blur(); }}
                               className={`w-16 text-center rounded-md border px-2 py-1.5 text-sm font-bold outline-none transition-all shadow-sm ${
-                                estaGuardando 
-                                  ? 'border-green-500 bg-green-50 text-green-700 ring-2 ring-green-200' 
-                                  : isEntregado ? 'border-[#6b2132] focus:ring-2 focus:ring-[#6b2132] bg-white' : 'border-gray-200 bg-gray-100'
+                                estaGuardando ? 'border-green-500 bg-green-50 text-green-700 ring-2 ring-green-200' : isEntregado ? 'border-[#6b2132] focus:ring-2 focus:ring-[#6b2132] bg-white' : 'border-gray-200 bg-gray-100'
                               }`}
                               placeholder="-"
                             />
@@ -389,10 +417,10 @@ const AssignmentGradePanel = () => {
                   <tr>
                     {asignaciones.map((asignacion) => (
                       <React.Fragment key={`sub-${asignacion.id}`}>
-                        <th className="px-4 py-2 border-b border-r border-gray-200 text-center text-[11px] font-semibold text-gray-500 uppercase tracking-wider w-[140px]">
-                          Estado
+                        <th className="px-4 py-2 border-b border-r border-gray-200 text-center text-[11px] font-semibold text-gray-500 uppercase tracking-wider w-[150px]">
+                          Estado y Archivo
                         </th>
-                        <th className="px-4 py-2 border-b border-r border-gray-200 text-center text-[11px] font-semibold text-gray-500 uppercase tracking-wider w-[120px]">
+                        <th className="px-4 py-2 border-b border-r border-gray-200 text-center text-[11px] font-semibold text-gray-500 uppercase tracking-wider w-[100px]">
                           Calificación
                         </th>
                       </React.Fragment>
@@ -417,6 +445,8 @@ const AssignmentGradePanel = () => {
                         const isEntregado = entrega && entrega.nombreArchivo; 
                         const inputKey = `${alumno.id}-${asignacion.id}`;
                         const estaGuardando = guardandoId === inputKey;
+                        const estaDescargando = descargandoId === inputKey;
+                        const estaCargandoPreview = cargandoPreviewId === inputKey;
 
                         return (
                           <React.Fragment key={`${alumno.id}-${asignacion.id}`}>
@@ -427,11 +457,14 @@ const AssignmentGradePanel = () => {
                                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-700">
                                       <i data-lucide="check-circle" className="w-3 h-3"></i> ENTREGADO
                                     </span>
-                                    <div className="flex gap-1">
-                                      <button onClick={() => handleDescargarArchivo(entrega)} disabled={descargando} className={`p-1.5 rounded-md border shadow-sm transition-colors flex items-center justify-center ${descargando ? 'opacity-50 cursor-wait bg-gray-50 border-gray-200 text-gray-400' : 'bg-white border-green-200 text-green-700 hover:bg-green-50'}`}>
-                                        <i data-lucide="download" className="w-3.5 h-3.5"></i>
+                                    <div className="flex gap-1.5 mt-1">
+                                      <button onClick={() => handleVerPreview(entrega)} disabled={estaCargandoPreview} title="Ver previa" className="p-1.5 rounded-md bg-white border border-blue-200 text-blue-600 shadow-sm hover:bg-blue-50 transition-colors">
+                                        <i data-lucide={estaCargandoPreview ? "loader-2" : "eye"} className={`w-3.5 h-3.5 ${estaCargandoPreview ? "animate-spin" : ""}`}></i>
                                       </button>
-                                      <button onClick={() => handleDevolverEntrega(entrega)} className="p-1.5 rounded-md bg-white border border-red-200 text-red-600 shadow-sm hover:bg-red-50 transition-colors flex items-center justify-center">
+                                      <button onClick={() => handleDescargarArchivo(entrega)} disabled={estaDescargando} title="Descargar archivo" className="p-1.5 rounded-md bg-white border border-green-200 text-green-700 shadow-sm hover:bg-green-50 transition-colors">
+                                        <i data-lucide={estaDescargando ? "loader-2" : "download"} className={`w-3.5 h-3.5 ${estaDescargando ? "animate-spin" : ""}`}></i>
+                                      </button>
+                                      <button onClick={() => handleDevolverEntrega(entrega)} title="Devolver asignación" className="p-1.5 rounded-md bg-white border border-red-200 text-red-600 shadow-sm hover:bg-red-50 transition-colors">
                                         <i data-lucide="rotate-ccw" className="w-3.5 h-3.5"></i>
                                       </button>
                                     </div>
@@ -453,7 +486,7 @@ const AssignmentGradePanel = () => {
                                   onChange={(event) => handleInputChange(alumno.id, asignacion.id, event.target.value)}
                                   onBlur={(event) => handleSaveGrade(alumno.id, asignacion.id, event.target.value)}
                                   onKeyDown={(event) => { if (event.key === 'Enter') event.target.blur(); }}
-                                  className={`w-20 text-center rounded-lg border px-2 py-1.5 text-sm font-semibold outline-none transition-all shadow-sm ${
+                                  className={`w-16 text-center rounded-lg border px-2 py-1.5 text-sm font-semibold outline-none transition-all shadow-sm ${
                                     estaGuardando 
                                       ? 'border-green-500 bg-green-50 text-green-700 ring-2 ring-green-200 scale-105 font-bold' 
                                       : isEntregado ? 'border-[#6b2132] focus:ring-2 focus:ring-[#6b2132] bg-white' : 'border-gray-200 focus:border-gray-400 bg-gray-50'
@@ -479,6 +512,67 @@ const AssignmentGradePanel = () => {
             </div>
           </div>
         </>
+      )}
+
+      {/* ================= MODAL DE PREVIEW ================= */}
+      {previewInfo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 md:p-8 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl w-full max-w-5xl max-h-full flex flex-col shadow-2xl overflow-hidden relative">
+            
+            {/* Header del Modal */}
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="bg-[#6b2132]/10 p-2 rounded-lg text-[#6b2132]">
+                  <i data-lucide="file-text" className="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 text-lg truncate max-w-lg" title={previewInfo.nombreArchivo}>
+                    {previewInfo.nombreArchivo || 'Archivo adjunto'}
+                  </h3>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">Vista previa</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setPreviewInfo(null)}
+                className="p-2 rounded-full hover:bg-gray-200 text-gray-500 transition-colors"
+                title="Cerrar (Esc)"
+              >
+                <i data-lucide="x" className="w-6 h-6"></i>
+              </button>
+            </div>
+
+            {/* Contenido del Modal */}
+            <div className="flex-1 overflow-auto bg-gray-100 flex items-center justify-center p-6 min-h-[50vh]">
+              {previewInfo.mimeType?.startsWith('image/') ? (
+                <img 
+                  src={previewInfo.srcUrl} 
+                  alt="Previsualización de tarea" 
+                  className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-sm border border-gray-200"
+                />
+              ) : previewInfo.mimeType === 'application/pdf' ? (
+                <iframe 
+                  src={previewInfo.srcUrl} 
+                  className="w-full h-[70vh] rounded-lg shadow-sm border border-gray-200"
+                  title="PDF Preview"
+                />
+              ) : (
+                <div className="text-center p-8 bg-white rounded-xl shadow-sm border border-gray-200">
+                  <i data-lucide="file-warning" className="w-12 h-12 text-yellow-500 mx-auto mb-3"></i>
+                  <p className="font-semibold text-gray-800">Vista previa no disponible</p>
+                  <p className="text-sm text-gray-500 mt-1 mb-4">El navegador no puede previsualizar archivos de tipo: {previewInfo.mimeType}</p>
+                  <a 
+                    href={previewInfo.srcUrl} 
+                    download={previewInfo.nombreArchivo || 'archivo_entregado'}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-[#6b2132] text-white rounded-lg hover:bg-[#5a1b2a] transition-colors font-medium text-sm"
+                  >
+                    <i data-lucide="download" className="w-4 h-4"></i>
+                    Descargar en su lugar
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
