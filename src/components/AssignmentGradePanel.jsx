@@ -14,6 +14,7 @@ const AssignmentGradePanel = () => {
   const [grupo, setGrupo] = React.useState('Todos');
   const [parcial, setParcial] = React.useState(1);
   const [busqueda, setBusqueda] = React.useState(''); 
+  const [filtroEstado, setFiltroEstado] = React.useState('Todos'); 
   
   const [asignaciones, setAsignaciones] = React.useState([]);
   const [calificaciones, setCalificaciones] = React.useState([]);
@@ -21,6 +22,9 @@ const AssignmentGradePanel = () => {
   const [loading, setLoading] = React.useState(false);
   const [descargando, setDescargando] = React.useState(false);
   const [error, setError] = React.useState('');
+  
+  // Estado para saber qué input se está guardando y animarlo
+  const [guardandoId, setGuardandoId] = React.useState(null); 
 
   const grupos = React.useMemo(() => {
     const unique = new Set(
@@ -37,9 +41,26 @@ const AssignmentGradePanel = () => {
       const nombreCompleto = `${item.nombre} ${item.apellido}`.toLowerCase();
       const correo = item.email.toLowerCase();
       const pasaBusqueda = nombreCompleto.includes(textoBusqueda) || correo.includes(textoBusqueda);
-      return pasaGrupo && pasaBusqueda;
+      
+      let pasaEstado = true;
+      if (filtroEstado !== 'Todos' && asignaciones.length > 0) {
+        const entregasDelAlumno = asignaciones.filter((asig) => {
+          const entrega = entregasRegistradas.find(
+            (e) => Number(e.alumnoId) === Number(item.id) && Number(e.asignacionId) === Number(asig.id)
+          );
+          return entrega && entrega.nombreArchivo;
+        }).length;
+
+        if (filtroEstado === 'Completos') {
+          pasaEstado = entregasDelAlumno === asignaciones.length;
+        } else if (filtroEstado === 'Pendientes') {
+          pasaEstado = entregasDelAlumno < asignaciones.length;
+        }
+      }
+
+      return pasaGrupo && pasaBusqueda && pasaEstado;
     });
-  }, [grupo, busqueda, usuarios]);
+  }, [grupo, busqueda, usuarios, filtroEstado, asignaciones, entregasRegistradas]);
 
   React.useEffect(() => {
     const loadUsers = async () => {
@@ -98,31 +119,49 @@ const AssignmentGradePanel = () => {
         Number(item.asignacionId) === Number(asignacionId),
     );
 
-  const handleGradeChange = async (estudianteId, asignacionId, value) => {
+  // SOLO ACTUALIZA EL ESTADO LOCAL MIENTRAS ESCRIBE
+  const handleInputChange = (estudianteId, asignacionId, value) => {
     const numericValue = value === '' ? '' : Number(value);
     if (numericValue !== '' && (Number.isNaN(numericValue) || numericValue < 0 || numericValue > 100)) return;
-    if (numericValue === '') return;
-
-    const calificacionGuardada = await guardarCalificacionAsignacionRemota({
-      grupo: grupo === 'Todos' ? usuarios.find(u => u.id === estudianteId)?.grupo : grupo,
-      alumnoId: estudianteId,
-      parcial,
-      asignacionId,
-      calificacion: numericValue,
-      observaciones: '',
-    });
 
     setCalificaciones((actuales) => {
       const sinActual = actuales.filter(
-        (item) =>
-          !(
-            Number(item.alumnoId) === Number(estudianteId) &&
-            Number(item.asignacionId) === Number(asignacionId) &&
-            Number(item.parcial) === Number(parcial)
-          ),
+        (item) => !(Number(item.alumnoId) === Number(estudianteId) && Number(item.asignacionId) === Number(asignacionId)),
       );
-      return [...sinActual, calificacionGuardada];
+      return [...sinActual, { alumnoId: estudianteId, asignacionId, calificacion: numericValue, parcial }];
     });
+  };
+
+  // SE DISPARA AL DAR CLIC AFUERA O DAR ENTER
+  const handleSaveGrade = async (estudianteId, asignacionId, value) => {
+    if (value === '') return; // Evitamos mandar vacíos innecesarios
+
+    const inputKey = `${estudianteId}-${asignacionId}`;
+    setGuardandoId(inputKey); // Activamos animación de guardado
+
+    try {
+      const calificacionGuardada = await guardarCalificacionAsignacionRemota({
+        grupo: grupo === 'Todos' ? usuarios.find(u => u.id === estudianteId)?.grupo : grupo,
+        alumnoId: estudianteId,
+        parcial,
+        asignacionId,
+        calificacion: Number(value),
+        observaciones: '',
+      });
+
+      // Refrescamos el estado con lo que devolvió el servidor para asegurar sincronía
+      setCalificaciones((actuales) => {
+        const sinActual = actuales.filter(
+          (item) => !(Number(item.alumnoId) === Number(estudianteId) && Number(item.asignacionId) === Number(asignacionId)),
+        );
+        return [...sinActual, calificacionGuardada];
+      });
+    } catch (err) {
+      alert('Error al guardar la calificación en el servidor.');
+    } finally {
+      // Dejamos el feedback verde por medio segundo y luego lo limpiamos
+      setTimeout(() => setGuardandoId(null), 600);
+    }
   };
 
   const handleDescargarArchivo = async (entrega) => {
@@ -145,7 +184,7 @@ const AssignmentGradePanel = () => {
         link.download = archivoCompleto.nombreArchivo || `entrega_alumno_${entrega.alumnoId}`;
         link.click();
       } else {
-        alert('El archivo no está disponible o está corrupto en la base de datos.');
+        alert('El archivo no está disponible o está corrupto.');
       }
     } catch (err) {
       alert('Hubo un error de conexión al intentar descargar el archivo.');
@@ -155,31 +194,17 @@ const AssignmentGradePanel = () => {
   };
 
   const handleDevolverEntrega = async (entrega) => {
-    if (window.confirm('¿Estás seguro de devolver esta asignación? El alumno tendrá que subir el archivo de nuevo y la entrega actual se borrará de forma permanente.')) {
+    if (window.confirm('¿Estás seguro de devolver esta asignación? El alumno tendrá que subir el archivo de nuevo.')) {
       try {
-        // Borramos en el backend
         await devolverEntrega(entrega.alumnoId, entrega.asignacionId);
-        
-        // Actualizamos el estado del frontend para que desaparezca el badge verde
         setEntregasRegistradas((actuales) => 
           actuales.filter(item => 
-            !(Number(item.alumnoId) === Number(entrega.alumnoId) && 
-              Number(item.asignacionId) === Number(entrega.asignacionId))
+            !(Number(item.alumnoId) === Number(entrega.alumnoId) && Number(item.asignacionId) === Number(entrega.asignacionId))
           )
         );
-
-        // Limpiar la calificación asociada si también quieres que se borre
-        setCalificaciones((actuales) => 
-          actuales.filter(item => 
-            !(Number(item.alumnoId) === Number(entrega.alumnoId) && 
-              Number(item.asignacionId) === Number(entrega.asignacionId))
-          )
-        );
-        
         alert('Asignación devuelta correctamente.');
       } catch (error) {
         alert('Hubo un error al intentar devolver la asignación.');
-        console.error(error);
       }
     }
   };
@@ -190,11 +215,11 @@ const AssignmentGradePanel = () => {
       <div className="rounded-2xl border border-gray-200 bg-white p-4 md:p-6 shadow-sm">
         <h2 className="text-lg md:text-xl font-bold text-gray-900">Calificación por asignación</h2>
         <p className="mt-1 text-xs md:text-sm text-gray-500">
-          Busca alumnos, revisa entregas y registra calificaciones.
+          Busca alumnos, revisa entregas y registra calificaciones. Los cambios se guardan automáticamente al presionar Enter o dar clic fuera.
         </p>
         
-        <div className="mt-4 md:mt-6 flex flex-col md:flex-row gap-3 md:gap-4">
-          <div className="relative flex-1">
+        <div className="mt-4 md:mt-6 flex flex-wrap gap-3 md:gap-4">
+          <div className="relative flex-grow min-w-[200px]">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
               <i data-lucide="search" className="w-4 h-4 text-gray-400"></i>
             </div>
@@ -207,7 +232,7 @@ const AssignmentGradePanel = () => {
             />
           </div>
           
-          <div className="flex items-center gap-2 bg-white border border-gray-300 rounded-xl px-4 py-2.5 shadow-sm focus-within:ring-2 focus-within:ring-[#6b2132] transition-all md:w-64">
+          <div className="flex items-center gap-2 bg-white border border-gray-300 rounded-xl px-4 py-2.5 shadow-sm focus-within:ring-2 focus-within:ring-[#6b2132] transition-all flex-grow md:flex-grow-0 md:w-56">
             <i data-lucide="users" className="w-4 h-4 text-gray-500"></i>
             <select
               value={grupo}
@@ -222,7 +247,7 @@ const AssignmentGradePanel = () => {
             </select>
           </div>
 
-          <div className="flex items-center gap-2 bg-white border border-gray-300 rounded-xl px-4 py-2.5 shadow-sm focus-within:ring-2 focus-within:ring-[#6b2132] transition-all md:w-48">
+          <div className="flex items-center gap-2 bg-white border border-gray-300 rounded-xl px-4 py-2.5 shadow-sm focus-within:ring-2 focus-within:ring-[#6b2132] transition-all flex-grow md:flex-grow-0 md:w-40">
             <i data-lucide="calendar" className="w-4 h-4 text-gray-500"></i>
             <select
               value={parcial}
@@ -232,6 +257,19 @@ const AssignmentGradePanel = () => {
               <option value={1}>Parcial 1</option>
               <option value={2}>Parcial 2</option>
               <option value={3}>Parcial 3</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2 bg-white border border-gray-300 rounded-xl px-4 py-2.5 shadow-sm focus-within:ring-2 focus-within:ring-[#6b2132] transition-all flex-grow md:flex-grow-0 md:w-48">
+            <i data-lucide="filter" className="w-4 h-4 text-gray-500"></i>
+            <select
+              value={filtroEstado}
+              onChange={(event) => setFiltroEstado(event.target.value)}
+              className="bg-transparent outline-none w-full text-sm text-gray-700 cursor-pointer"
+            >
+              <option value="Todos">Cualquier estado</option>
+              <option value="Completos">Al día (Completos)</option>
+              <option value="Pendientes">Con pendientes</option>
             </select>
           </div>
         </div>
@@ -251,12 +289,10 @@ const AssignmentGradePanel = () => {
         </div>
       ) : (
         <>
-          {/* ========================================================= */}
-          {/* VISTA MÓVIL (Tarjetas - Solo visible en pantallas pequeñas) */}
-          {/* ========================================================= */}
+          {/* VISTA MÓVIL */}
           <div className="md:hidden space-y-4">
             {alumnosFiltrados.length === 0 && (
-              <p className="text-center text-gray-500 py-8">No se encontraron alumnos.</p>
+              <p className="text-center text-gray-500 py-8">No se encontraron alumnos con estos filtros.</p>
             )}
             {alumnosFiltrados.map((alumno) => (
               <div key={`mobile-${alumno.id}`} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
@@ -269,6 +305,8 @@ const AssignmentGradePanel = () => {
                   {asignaciones.map((asignacion) => {
                     const entrega = obtenerEntrega(alumno.id, asignacion.id);
                     const isEntregado = entrega && entrega.nombreArchivo;
+                    const inputKey = `${alumno.id}-${asignacion.id}`;
+                    const estaGuardando = guardandoId === inputKey;
 
                     return (
                       <div key={`mobile-${alumno.id}-${asignacion.id}`} className="bg-gray-50/80 p-3 rounded-lg border border-gray-100 flex flex-col gap-3">
@@ -308,8 +346,14 @@ const AssignmentGradePanel = () => {
                               min="0"
                               max="100"
                               value={obtenerCalificacion(alumno.id, asignacion.id)}
-                              onChange={(event) => handleGradeChange(alumno.id, asignacion.id, event.target.value)}
-                              className={`w-16 text-center rounded-md border px-2 py-1.5 text-sm font-bold outline-none transition-colors shadow-sm ${isEntregado ? 'border-[#6b2132] focus:ring-2 focus:ring-[#6b2132] bg-white' : 'border-gray-200 bg-gray-100'}`}
+                              onChange={(event) => handleInputChange(alumno.id, asignacion.id, event.target.value)}
+                              onBlur={(event) => handleSaveGrade(alumno.id, asignacion.id, event.target.value)}
+                              onKeyDown={(event) => { if (event.key === 'Enter') event.target.blur(); }}
+                              className={`w-16 text-center rounded-md border px-2 py-1.5 text-sm font-bold outline-none transition-all shadow-sm ${
+                                estaGuardando 
+                                  ? 'border-green-500 bg-green-50 text-green-700 ring-2 ring-green-200' 
+                                  : isEntregado ? 'border-[#6b2132] focus:ring-2 focus:ring-[#6b2132] bg-white' : 'border-gray-200 bg-gray-100'
+                              }`}
                               placeholder="-"
                             />
                           </div>
@@ -322,9 +366,7 @@ const AssignmentGradePanel = () => {
             ))}
           </div>
 
-          {/* ========================================================= */}
-          {/* VISTA DESKTOP (Tabla - Oculta en móviles)                   */}
-          {/* ========================================================= */}
+          {/* VISTA DESKTOP */}
           <div className="hidden md:block rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[900px]">
@@ -373,6 +415,8 @@ const AssignmentGradePanel = () => {
                       {asignaciones.map((asignacion) => {
                         const entrega = obtenerEntrega(alumno.id, asignacion.id);
                         const isEntregado = entrega && entrega.nombreArchivo; 
+                        const inputKey = `${alumno.id}-${asignacion.id}`;
+                        const estaGuardando = guardandoId === inputKey;
 
                         return (
                           <React.Fragment key={`${alumno.id}-${asignacion.id}`}>
@@ -406,8 +450,14 @@ const AssignmentGradePanel = () => {
                                   min="0"
                                   max="100"
                                   value={obtenerCalificacion(alumno.id, asignacion.id)}
-                                  onChange={(event) => handleGradeChange(alumno.id, asignacion.id, event.target.value)}
-                                  className={`w-20 text-center rounded-lg border px-2 py-1.5 text-sm font-semibold outline-none transition-colors shadow-sm ${isEntregado ? 'border-[#6b2132] focus:ring-2 focus:ring-[#6b2132] bg-white' : 'border-gray-200 focus:border-gray-400 bg-gray-50'}`}
+                                  onChange={(event) => handleInputChange(alumno.id, asignacion.id, event.target.value)}
+                                  onBlur={(event) => handleSaveGrade(alumno.id, asignacion.id, event.target.value)}
+                                  onKeyDown={(event) => { if (event.key === 'Enter') event.target.blur(); }}
+                                  className={`w-20 text-center rounded-lg border px-2 py-1.5 text-sm font-semibold outline-none transition-all shadow-sm ${
+                                    estaGuardando 
+                                      ? 'border-green-500 bg-green-50 text-green-700 ring-2 ring-green-200 scale-105 font-bold' 
+                                      : isEntregado ? 'border-[#6b2132] focus:ring-2 focus:ring-[#6b2132] bg-white' : 'border-gray-200 focus:border-gray-400 bg-gray-50'
+                                  }`}
                                   placeholder="-"
                                 />
                               </div>
@@ -420,7 +470,7 @@ const AssignmentGradePanel = () => {
                   {alumnosFiltrados.length === 0 && (
                     <tr>
                       <td colSpan={asignaciones.length * 2 + 1} className="py-8 text-center text-gray-500">
-                        No se encontraron alumnos.
+                        No se encontraron alumnos con los filtros seleccionados.
                       </td>
                     </tr>
                   )}
