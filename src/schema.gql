@@ -170,7 +170,6 @@ input LoginAlumnoInput {
 type Mutation {
   actualizarAsignacion(datos: UpdateAsignacionInput!): Asignacion!
   actualizarContenido(datos: UpdateContenidoInput!): Contenido!
-  actualizarMiPerfil(datos: UpdateUsuarioInput!): Alumno!
   actualizarUnidad(updateUnidadInput: UpdateUnidadInput!): Unidad!
 
   """Actualiza los datos de un usuario desde el panel de administración"""
@@ -309,17 +308,6 @@ input UpdateUnidadInput {
 }
 
 input UpdateUsuarioAdminInput {
-  apellido: String
-  email: String
-  estado: EstadoUsuario
-  grupo: String
-  id: Int!
-  nombre: String
-  password: String
-  rol: RolUsuario
-}
-
-input UpdateUsuarioInput {
   apellido: String
   email: String
   estado: EstadoUsuario
