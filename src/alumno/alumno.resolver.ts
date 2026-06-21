@@ -15,6 +15,7 @@ import { LoginAlumnoInput } from './dto/login-alumno.input';
 import { AlumnoService } from './alumno.service';
 import { CreateUsuarioInput } from './dto/create-usuario.input';
 import { UpdateUsuarioInput } from './dto/update-usuario.input';
+import { ForbiddenException } from '@nestjs/common';
 
 @Resolver(() => Alumno)
 export class AlumnoResolver {
@@ -48,9 +49,21 @@ export class AlumnoResolver {
     return this.alumnoService.createUsuario(datos);
   }
 
-  @Mutation(() => Alumno, { name: 'actualizarMiPerfil' })
-  actualizarMiPerfil(@Args('datos') datos: UpdateUsuarioInput, @Context() context: any) {
-    this.alumnoService.requireRoles(context, [RolUsuario.ALUMNO, RolUsuario.MODERADOR, RolUsuario.ADMINISTRADOR]);
+  @Mutation(() => Alumno, { name: 'actualizarUsuario' })
+  async actualizarUsuario(@Args('datos') datos: UpdateUsuarioInput, @Context() context: any) {
+    const usuarioLogueado = this.alumnoService.requireRoles(context, [
+      RolUsuario.ALUMNO, 
+      RolUsuario.MODERADOR, 
+      RolUsuario.ADMINISTRADOR
+    ]);
+
+    const esAdmin = usuarioLogueado.rol === RolUsuario.ADMINISTRADOR;
+    const esPropietario = usuarioLogueado.id === datos.id;
+
+    if (!esAdmin && !esPropietario) {
+      throw new ForbiddenException('No tienes permisos para modificar este perfil');
+    }
+
     return this.alumnoService.updateUsuario(datos);
   }
 
