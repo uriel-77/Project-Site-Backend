@@ -5,6 +5,7 @@ import { CreateAsignacionInput } from './dto/create-asignacion.input';
 import { UpdateAsignacionInput } from './dto/update-asignacion.input';
 import { AlumnoService } from '../alumno/alumno.service';
 import { RolUsuario } from '../alumno/entities/alumno.entity';
+import { AsignacionKpis } from './dto/asignacion-kpis.output';
 
 @Resolver(() => Asignacion)
 export class AsignacionResolver {
@@ -43,5 +44,10 @@ export class AsignacionResolver {
   remove(@Args('id', { type: () => Int }) id: number, @Context() context: any) {
     this.alumnoService.requireRoles(context, [RolUsuario.MODERADOR, RolUsuario.ADMINISTRADOR]);
     return this.asignacionService.remove(id);
+  }
+
+  @Query(() => AsignacionKpis)
+  async getKpisGrupo(@Args('grupo') grupo: string) {
+    return this.asignacionService.getKpisPorGrupo(grupo);
   }
 }

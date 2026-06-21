@@ -29,6 +29,13 @@ type Asignacion {
   videos: [Video!]
 }
 
+type AsignacionKpis {
+  alumnosEnRiesgo: [String!]!
+  entregasRealizadas: Int!
+  tasaCumplimiento: Float!
+  totalAlumnos: Int!
+}
+
 type AuthPayload {
   token: String!
   usuario: Alumno!
@@ -37,12 +44,12 @@ type AuthPayload {
 type CalificacionAsignacion {
   alumnoId: Int!
   asignacionId: Int!
-  calificacion: Int!
-  fechaCalificacion: String!
-  grupo: String!
-  id: ID!
+  calificacion: Float
+  fechaCalificacion: DateTime
+  grupo: String
+  id: Int!
   observaciones: String
-  parcial: Int!
+  parcial: Int
 }
 
 type Contenido {
@@ -117,18 +124,21 @@ input CreateVideoInput {
   youtubeUrl: String!
 }
 
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 type Entrega {
   alumnoId: Int!
-  archivoBase64: String!
+  archivoBase64: String
   asignacionId: Int!
-  estado: String!
-  fechaEntrega: String!
-  grupo: String!
-  id: ID!
-  mimeType: String!
-  nombreArchivo: String!
-  parcial: Int!
-  tamano: Int!
+  calificacion: Float
+  entregadoEn: DateTime
+  id: Int!
+  mimeType: String
+  nombreArchivo: String
+  tamano: Int
 }
 
 enum EstadoUsuario {
@@ -173,6 +183,7 @@ type Mutation {
   crearUnidad(createUnidadInput: CreateUnidadInput!): Unidad!
   crearUsuario(datos: CreateUsuarioInput!): Alumno!
   crearVideo(datos: CreateVideoInput!): Video!
+  devolverEntrega(alumnoId: Int!, asignacionId: Int!): Boolean!
   eliminarAsignacion(id: Int!): Asignacion!
   eliminarContenido(id: Int!): Contenido!
   eliminarUnidad(id: Int!): Unidad!
@@ -196,6 +207,7 @@ type Query {
   contenido(id: Int!): Contenido
   contenidos(tipoMateria: TipoMateria): [Contenido!]!
   entregas(alumnoId: Int, asignacionId: Int, grupo: String, parcial: Int): [Entrega!]!
+  getKpisGrupo(grupo: String!): AsignacionKpis!
   grupos: [String!]!
   insignias: [Insignia!]!
   ping: String!
@@ -211,10 +223,8 @@ input RegistrarEntregaInput {
   alumnoId: Int!
   archivoBase64: String!
   asignacionId: Int!
-  grupo: String!
   mimeType: String!
   nombreArchivo: String!
-  parcial: Int!
   tamano: Int!
 }
 

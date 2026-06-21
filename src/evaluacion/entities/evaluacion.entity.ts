@@ -1,8 +1,8 @@
-import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 
 @ObjectType()
 export class Entrega {
-  @Field(() => ID)
+  @Field(() => Int)
   id: number;
 
   @Field(() => Int)
@@ -11,34 +11,29 @@ export class Entrega {
   @Field(() => Int)
   alumnoId: number;
 
-  @Field()
-  grupo: string;
+  @Field(() => Float, { nullable: true })
+  calificacion?: number;
 
-  @Field(() => Int)
-  parcial: number;
+  @Field({ nullable: true })
+  entregadoEn?: Date;
 
-  @Field()
-  nombreArchivo: string;
+  // Los campos nuevos para los archivos
+  @Field({ nullable: true })
+  nombreArchivo?: string;
 
-  @Field()
-  mimeType: string;
+  @Field({ nullable: true })
+  mimeType?: string;
 
-  @Field(() => Int)
-  tamano: number;
+  @Field(() => Int, { nullable: true })
+  tamano?: number;
 
-  @Field()
-  archivoBase64: string;
-
-  @Field()
-  estado: string;
-
-  @Field()
-  fechaEntrega: string;
+  @Field({ nullable: true })
+  archivoBase64?: string;
 }
 
 @ObjectType()
 export class CalificacionAsignacion {
-  @Field(() => ID)
+  @Field(() => Int)
   id: number;
 
   @Field(() => Int)
@@ -47,18 +42,18 @@ export class CalificacionAsignacion {
   @Field(() => Int)
   alumnoId: number;
 
-  @Field()
-  grupo: string;
+  @Field({ nullable: true })
+  grupo?: string;
 
-  @Field(() => Int)
-  parcial: number;
+  @Field(() => Int, { nullable: true })
+  parcial?: number;
 
-  @Field(() => Int)
-  calificacion: number;
+  @Field(() => Float, { nullable: true })
+  calificacion?: number;
 
   @Field({ nullable: true })
   observaciones?: string;
 
-  @Field()
-  fechaCalificacion: string;
+  @Field({ nullable: true })
+  fechaCalificacion?: Date;
 }

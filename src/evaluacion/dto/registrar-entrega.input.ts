@@ -9,12 +9,6 @@ export class RegistrarEntregaInput {
   alumnoId: number;
 
   @Field()
-  grupo: string;
-
-  @Field(() => Int)
-  parcial: number;
-
-  @Field()
   nombreArchivo: string;
 
   @Field()

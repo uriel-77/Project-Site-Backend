@@ -53,6 +53,8 @@ const UNIT_ID_OFFSET: Record<TipoMateriaValue, number> = {
 
 function cargarMock(): MockContenido[] {
   const posiblesRutas = [
+    resolve(process.cwd(), '../Front_Oficial/src/data/mockGuionDidactico.js'),
+    resolve(process.cwd(), '../Back_Oficial/src/data/mockGuionDidactico.js'),
     resolve(process.cwd(), '../Instruccional/src/data/mockGuionDidactico.js'),
     resolve(process.cwd(), '../compiladores/src/data/mockGuionDidactico.js'),
   ];
@@ -179,6 +181,8 @@ async function sembrarContenidos(
 }
 
 async function sembrarVideosYAsignacionesDemo() {
+  // Borrado en cascada correcto
+  await prisma.entrega.deleteMany();
   await prisma.asignacion.deleteMany();
   await prisma.video.deleteMany();
 
@@ -263,23 +267,37 @@ async function sembrarVideosYAsignacionesDemo() {
   ];
 
   for (const registro of registros) {
-    const [video] = await prisma.$queryRawUnsafe<
-      { id: number }[]
-    >(
-      `
-        INSERT INTO "Video" ("titulo", "descripcion", "youtubeUrl", "youtubeId", "tipos", "publicado", "contenidoId")
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
-        RETURNING id
-      `,
-      registro.video.titulo,
-      registro.video.descripcion,
-      registro.video.youtubeUrl,
-      registro.video.youtubeId,
-      registro.video.tipos,
-      true,
-      registro.contenido.id,
-    );
+    // Método nativo de Prisma para evitar el error de Postgres con los arreglos de enums
+    const video = await prisma.video.create({
+      data: {
+        titulo: registro.video.titulo,
+        descripcion: registro.video.descripcion,
+        youtubeUrl: registro.video.youtubeUrl,
+        youtubeId: registro.video.youtubeId,
+        tipos: registro.video.tipos, 
+        publicado: true,
+        contenidoId: registro.contenido.id,
+      }
+    });
 
+    await prisma.asignacion.create({
+      data: {
+        titulo: registro.asignacion.titulo,
+        descripcion: registro.asignacion.descripcion,
+        porcentaje: registro.asignacion.porcentaje,
+        periodo: registro.asignacion.periodo,
+        grupo: registro.asignacion.grupo,
+        entregable: registro.asignacion.entregable,
+        rubrica: registro.asignacion.rubrica,
+        orden: registro.asignacion.orden,
+        activa: registro.asignacion.activa,
+        contenidoId: registro.contenido.id,
+        videos: {
+          connect: { id: video.id }
+        }
+      },
+    });
+  
     const asignacion = await prisma.asignacion.create({
       data: {
         ...registro.asignacion,
@@ -348,7 +366,7 @@ async function sembrarInsignias() {
 }
 
 async function main() {
-  console.log('🌱 Sincronizando contenidos desde compiladores/src/data/mockGuionDidactico.js');
+  console.log('🌱 Sincronizando contenidos desde el mock del Front...');
 
   const mock = cargarMock();
   const { unidades, contenidos } = construirDatos(mock);

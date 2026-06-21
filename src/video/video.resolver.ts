@@ -1,5 +1,5 @@
-import { Args, Context, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { Video } from './entities/video.entity';
+import { Args, Context, Int, Mutation, Query, Resolver, ResolveField, Parent } from '@nestjs/graphql';
+import { Video, TipoVideo } from './entities/video.entity';
 import { VideoService } from './video.service';
 import { CreateVideoInput } from './dto/create-video.input';
 import { UpdateVideoInput } from './dto/update-video.input';
@@ -12,6 +12,22 @@ export class VideoResolver {
     private readonly videoService: VideoService,
     private readonly alumnoService: AlumnoService,
   ) {}
+
+  @ResolveField(() => [TipoVideo])
+  tipos(@Parent() video: Video) {
+    if (!video.tipos) return [];
+    
+    if (typeof video.tipos === 'string') {
+      try {
+        const parsed = (video.tipos as string).replace(/^{/, '[').replace(/}$/, ']');
+        return JSON.parse(parsed);
+      } catch (e) {
+        return [];
+      }
+    }
+    
+    return video.tipos;
+  }
 
   @Query(() => [Video], { name: 'videos' })
   findAll(
