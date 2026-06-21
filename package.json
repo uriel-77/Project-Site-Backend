@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "name": "diseno-instruccional",
   "version": "1.0.0",
   "private": true,
@@ -42,7 +41,7 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-=======
+  },
   "name": "project-site-backend",
   "version": "0.0.1",
   "description": "",
@@ -132,6 +131,5 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
->>>>>>> feature/schema-entregas-archivos
   }
 }
