@@ -10,8 +10,10 @@ function getPort() {
     return Number(envPort);
   }
 
-  if (existsSync('.env')) {
-    const env = readFileSync('.env', 'utf8');
+  const envFile = ['.env', 'env'].find((fileName) => existsSync(fileName));
+
+  if (envFile) {
+    const env = readFileSync(envFile, 'utf8');
     const filePort = env.match(/PORT="?([^"\n]+)"?/)?.[1]?.trim();
 
     if (filePort) {

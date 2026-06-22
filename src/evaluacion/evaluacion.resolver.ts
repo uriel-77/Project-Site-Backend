@@ -72,7 +72,9 @@ export class EvaluacionResolver {
   async devolverEntrega(
     @Args('alumnoId', { type: () => Int }) alumnoId: number,
     @Args('asignacionId', { type: () => Int }) asignacionId: number,
+    @Context() context: any,
   ) {
+    this.alumnoService.requireRoles(context, [RolUsuario.MODERADOR, RolUsuario.ADMINISTRADOR]);
     return await this.evaluacionService.devolverEntrega(alumnoId, asignacionId);
   }
 }

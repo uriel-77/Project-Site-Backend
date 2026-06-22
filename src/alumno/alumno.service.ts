@@ -56,7 +56,7 @@ export class AlumnoService {
     });
 
     if (!usuario) {
-      throw new UnauthorizedException('El usuario no existe');
+      throw new UnauthorizedException('Usuario o contraseña incorrectos');
     }
 
     if (usuario.estado !== EstadoUsuario.ACTIVO) {
@@ -66,7 +66,7 @@ export class AlumnoService {
     const passwordPlano = decodeIncomingPassword(datos.password);
 
     if (!verifyPassword(passwordPlano, usuario.password)) {
-      throw new UnauthorizedException('Contraseña incorrecta');
+      throw new UnauthorizedException('Usuario o contraseña incorrectos');
     }
 
     if (!isPasswordHashed(usuario.password)) {
@@ -177,6 +177,7 @@ export class AlumnoService {
     rol: RolUsuario;
     estado: EstadoUsuario;
   }) {
+    this.validatePassword(datos.password);
     const email = datos.email.toLowerCase().trim();
     const usuarioExistente = await this.prisma.alumno.findUnique({ where: { email } });
 
@@ -195,6 +196,12 @@ export class AlumnoService {
         estado: datos.estado,
       },
     });
+  }
+
+  private validatePassword(password: string) {
+    if (!password || password.length < 6) {
+      throw new BadRequestException('La contraseña debe tener al menos 6 caracteres');
+    }
   }
 
   private toSessionUser(usuario: any): SessionUser {

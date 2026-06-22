@@ -1,57 +1,17 @@
 {
-  "name": "diseno-instruccional",
-  "version": "1.0.0",
-  "private": true,
-  "engines": {
-    "node": "18.x"
-  },
-  "dependencies": {
-    "@apollo/client": "^4.2.0",
-    "graphql": "^16.14.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
-    "recharts": "^3.8.1"
-  },
-  "scripts": {
-    "start": "node scripts/start-prototype.js",
-    "start:client": "react-scripts start",
-    "start:api": "node server.js",
-    "build": "react-scripts build",
-    "serve": "NODE_ENV=production node server.js",
-    "serve:local": "node server.js",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "postinstall": "chmod +x node_modules/.bin/react-scripts || true"
-  },
-  "proxy": "http://localhost:3001",
-  "eslintConfig": {
-    "extends": [
-      "react-app"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
   "name": "project-site-backend",
   "version": "0.0.1",
   "description": "",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "prisma generate && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
+    "start": "npm run build && node dist/src/main.js",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main.js",
