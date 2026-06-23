@@ -19,4 +19,13 @@ describe('AppController', () => {
       expect(appController.getHello()).toBe('Hello World!');
     });
   });
+
+  describe('health', () => {
+    it('should return service health', () => {
+      expect(appController.getHealth()).toEqual({
+        ok: true,
+        service: 'project-site-backend',
+      });
+    });
+  });
 });

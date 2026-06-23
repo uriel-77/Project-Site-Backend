@@ -67,8 +67,8 @@ loadLocalEnvFiles();
       autoSchemaFile:
         process.env.NODE_ENV === 'production' ? true : join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
-      playground: true,
-      introspection: true,
+      playground: process.env.NODE_ENV !== 'production',
+      introspection: process.env.NODE_ENV !== 'production',
       context: ({ req }) => ({ req }),
     }),
   ],

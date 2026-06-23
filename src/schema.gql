@@ -171,9 +171,7 @@ type Mutation {
   actualizarAsignacion(datos: UpdateAsignacionInput!): Asignacion!
   actualizarContenido(datos: UpdateContenidoInput!): Contenido!
   actualizarUnidad(updateUnidadInput: UpdateUnidadInput!): Unidad!
-
-  """Actualiza los datos de un usuario desde el panel de administración"""
-  actualizarUsuario(datos: UpdateUsuarioAdminInput!): Alumno!
+  actualizarUsuario(datos: UpdateUsuarioInput!): Alumno!
   actualizarVideo(datos: UpdateVideoInput!): Video!
   completarContenido(alumnoId: Int!, contenidoId: Int!): Alumno
   crearAlumno(datos: CreateAlumnoInput!): Alumno!
@@ -307,7 +305,7 @@ input UpdateUnidadInput {
   nombre: String
 }
 
-input UpdateUsuarioAdminInput {
+input UpdateUsuarioInput {
   apellido: String
   email: String
   estado: EstadoUsuario
