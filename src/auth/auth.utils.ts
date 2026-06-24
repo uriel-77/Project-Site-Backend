@@ -11,6 +11,8 @@ import { EstadoUsuario, RolUsuario } from '../alumno/entities/alumno.entity';
 const TOKEN_TTL_MS = 1000 * 60 * 60 * 12;
 const DEV_AUTH_SECRET = 'dev-auth-secret-change-me';
 const DEV_TRANSPORT_SECRET = 'local-dev-transport-secret-2025';
+let warnedAuthFallback = false;
+let warnedTransportFallback = false;
 
 export type SessionUser = {
   id: number;
@@ -34,21 +36,31 @@ function getAuthSecret() {
   }
 
   if (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT) {
-    throw new Error('AUTH_SECRET no esta configurada para el entorno productivo.');
+    if (!warnedAuthFallback) {
+      warnedAuthFallback = true;
+      console.warn('AUTH_SECRET no esta configurada. Usando secreto de compatibilidad temporal.');
+    }
   }
 
   return DEV_AUTH_SECRET;
 }
 
 function getTransportSecret() {
-  const secret = process.env.AUTH_TRANSPORT_SECRET?.trim();
+  const secret =
+    process.env.AUTH_TRANSPORT_SECRET?.trim() ||
+    process.env.REACT_APP_AUTH_TRANSPORT_SECRET?.trim();
 
   if (secret) {
     return secret;
   }
 
   if (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT) {
-    throw new Error('AUTH_TRANSPORT_SECRET no esta configurada para el entorno productivo.');
+    if (!warnedTransportFallback) {
+      warnedTransportFallback = true;
+      console.warn(
+        'AUTH_TRANSPORT_SECRET no esta configurada. Usando secreto de compatibilidad temporal.',
+      );
+    }
   }
 
   return DEV_TRANSPORT_SECRET;

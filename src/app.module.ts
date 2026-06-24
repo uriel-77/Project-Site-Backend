@@ -11,8 +11,12 @@ import { InsigniaModule } from './insignia/insignia.module';
 import { AsignacionModule } from './asignacion/asignacion.module';
 import { VideoModule } from './video/video.module';
 import { EvaluacionModule } from './evaluacion/evaluacion.module';
+import { QuizModule } from './quiz/quiz.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { loadLocalEnvFiles } from './load-env';
+
+loadLocalEnvFiles();
 
 @Module({
   imports: [
@@ -25,6 +29,7 @@ import { AppService } from './app.service';
     AsignacionModule,
     VideoModule,
     EvaluacionModule,
+    QuizModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile:
