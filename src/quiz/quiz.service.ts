@@ -17,6 +17,10 @@ export class QuizService implements OnModuleInit {
   constructor(private readonly prisma: PrismaService) {}
 
   async onModuleInit() {
+    if (process.env.VERCEL === '1' || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+      return;
+    }
+
     await this.seedDefaultQuizzes();
   }
 

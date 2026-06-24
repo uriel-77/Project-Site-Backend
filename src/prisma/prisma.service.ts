@@ -135,6 +135,10 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   };
   
   async onModuleInit() {
+    if (this.isServerlessRuntime()) {
+      return;
+    }
+
     await this.ensureCoreSchema();
     await this.ensureDefaultUsuarios();
     await this.pool.query('SELECT 1');
@@ -1200,6 +1204,10 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
         'DATABASE_URL apunta a localhost. En Railway debes vincular PostgreSQL al servicio backend o usar la URL privada/publica que entrega Railway; localhost dentro del contenedor no apunta a tu base.',
       );
     }
+  }
+
+  private isServerlessRuntime() {
+    return process.env.VERCEL === '1' || process.env.AWS_LAMBDA_FUNCTION_NAME;
   }
 
   private async ensureCoreSchema() {
