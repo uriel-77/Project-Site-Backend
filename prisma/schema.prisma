@@ -59,12 +59,14 @@ model Alumno {
   estado   String  @default("ACTIVO")
   verificationCodes VerificationCode[]
   entregas          Entrega[]
+  quizIntentos      QuizIntento[]
 }
 
 model Unidad {
   id         Int         @id @default(autoincrement())
   nombre     String
   contenidos Contenido[]
+  quizzes    QuizUnidad[]
 }
 
 model Contenido {
@@ -90,6 +92,7 @@ model Video {
   youtubeId   String
   tipos       TipoVideo[]
   publicado   Boolean       @default(true)
+  tipoMateria TipoMateria?
   contenidoId Int?
   contenido   Contenido?    @relation(fields: [contenidoId], references: [id])
   asignaciones Asignacion[]
@@ -161,4 +164,47 @@ model Entrega {
   mimeType      String?
   tamano        Int?
   archivoBase64 String?
+}
+
+model QuizUnidad {
+  id          Int           @id @default(autoincrement())
+  titulo      String
+  descripcion String        @default("")
+  unidadId    Int
+  tipoMateria TipoMateria
+  publicado   Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  unidad      Unidad        @relation(fields: [unidadId], references: [id])
+  preguntas   QuizPregunta[]
+  intentos    QuizIntento[]
+
+  @@unique([unidadId, tipoMateria])
+}
+
+model QuizPregunta {
+  id                    Int        @id @default(autoincrement())
+  quizId                Int
+  enunciado             String
+  opciones              String[]
+  respuestaCorrectaIndex Int
+  explicacion           String     @default("")
+  orden                 Int        @default(0)
+  quiz                  QuizUnidad @relation(fields: [quizId], references: [id], onDelete: Cascade)
+}
+
+model QuizIntento {
+  id                    Int        @id @default(autoincrement())
+  quizId                Int
+  alumnoId              Int
+  respuestasSeleccionadas Int[]
+  aciertos              Int
+  totalPreguntas        Int
+  porcentaje            Float
+  completadoEn          DateTime   @default(now())
+  quiz                  QuizUnidad @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  alumno                Alumno     @relation(fields: [alumnoId], references: [id], onDelete: Cascade)
+
+  @@index([alumnoId])
+  @@index([quizId])
 }

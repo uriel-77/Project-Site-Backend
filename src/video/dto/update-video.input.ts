@@ -1,5 +1,6 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { TipoVideo } from '../entities/video.entity';
+import { TipoMateria } from '../../contenido/entities/contenido.entity';
 
 @InputType()
 export class UpdateVideoInput {
@@ -17,6 +18,9 @@ export class UpdateVideoInput {
 
   @Field(() => [TipoVideo], { nullable: true })
   tipos?: TipoVideo[];
+
+  @Field(() => TipoMateria, { nullable: true })
+  tipoMateria?: TipoMateria;
 
   @Field(() => Int, { nullable: true })
   contenidoId?: number;

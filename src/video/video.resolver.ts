@@ -5,6 +5,7 @@ import { CreateVideoInput } from './dto/create-video.input';
 import { UpdateVideoInput } from './dto/update-video.input';
 import { AlumnoService } from '../alumno/alumno.service';
 import { RolUsuario } from '../alumno/entities/alumno.entity';
+import { TipoMateria } from '../contenido/entities/contenido.entity';
 
 @Resolver(() => Video)
 export class VideoResolver {
@@ -34,8 +35,9 @@ export class VideoResolver {
     @Args('contenidoId', { type: () => Int, nullable: true }) contenidoId?: number,
     @Args('asignacionId', { type: () => Int, nullable: true }) asignacionId?: number,
     @Args('publicado', { nullable: true }) publicado?: boolean,
+    @Args('tipoMateria', { type: () => TipoMateria, nullable: true }) tipoMateria?: TipoMateria,
   ) {
-    return this.videoService.findAll(contenidoId, asignacionId, publicado);
+    return this.videoService.findAll(contenidoId, asignacionId, publicado, tipoMateria);
   }
 
   @Query(() => Video, { name: 'video', nullable: true })

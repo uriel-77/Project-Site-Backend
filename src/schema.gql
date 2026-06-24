@@ -119,6 +119,7 @@ input CreateVideoInput {
   contenidoId: Int
   descripcion: String! = ""
   publicado: Boolean! = true
+  tipoMateria: TipoMateria
   tipos: [TipoVideo!]!
   titulo: String!
   youtubeUrl: String!
@@ -187,8 +188,10 @@ type Mutation {
   eliminarUsuario(id: Int!): Alumno!
   eliminarVideo(id: Int!): Video!
   guardarCalificacionAsignacion(datos: GuardarCalificacionAsignacionInput!): CalificacionAsignacion!
+  guardarQuizUnidad(datos: UpsertQuizUnidadInput!): QuizUnidadEditable!
   iniciarSesion(datos: LoginAlumnoInput!): AuthPayload!
   registrarEntrega(datos: RegistrarEntregaInput!): Entrega!
+  registrarIntentoQuiz(datos: RegistrarIntentoQuizInput!): QuizIntentoResultado!
 
   """Valida el código y actualiza la contraseña"""
   restablecerPassword(datos: RestablecerPasswordInput!): Boolean!
@@ -207,13 +210,110 @@ type Query {
   getKpisGrupo(grupo: String!): AsignacionKpis!
   grupos: [String!]!
   insignias: [Insignia!]!
+  miProgresoQuizzes(tipoMateria: TipoMateria!): [QuizDominioUnidad!]!
   ping: String!
+  quizzesGestionPorMateria(tipoMateria: TipoMateria!): [QuizUnidadEditable!]!
+  quizzesPorMateria(tipoMateria: TipoMateria!): [QuizUnidad!]!
+  rendimientoQuizzesMateria(grupo: String, tipoMateria: TipoMateria!): [QuizRendimientoAlumno!]!
   rubricasPorPeriodo(periodo: Int!): [Rubrica!]!
   unidad(id: Int!): Unidad
   unidades(tipoMateria: TipoMateria): [Unidad!]!
   usuarios: [Alumno!]!
   video(id: Int!): Video
-  videos(asignacionId: Int, contenidoId: Int, publicado: Boolean): [Video!]!
+  videos(asignacionId: Int, contenidoId: Int, publicado: Boolean, tipoMateria: TipoMateria): [Video!]!
+}
+
+type QuizDominioUnidad {
+  completadoEn: DateTime
+  intentos: Int!
+  porcentajeMejor: Float!
+  porcentajeUltimo: Float!
+  quizId: Int!
+  titulo: String!
+  unidadId: Int!
+  unidadNombre: String!
+}
+
+type QuizIntento {
+  aciertos: Int!
+  alumnoId: Int!
+  completadoEn: DateTime!
+  id: Int!
+  porcentaje: Float!
+  quizId: Int!
+  totalPreguntas: Int!
+}
+
+type QuizIntentoResultado {
+  intento: QuizIntento!
+  revisiones: [QuizRevisionRespuesta!]!
+}
+
+type QuizPregunta {
+  enunciado: String!
+  id: Int!
+  opciones: [String!]!
+  orden: Int!
+}
+
+input QuizPreguntaDraftInput {
+  enunciado: String!
+  explicacion: String
+  id: Int
+  opciones: [String!]!
+  orden: Int!
+  respuestaCorrectaIndex: Int!
+}
+
+type QuizPreguntaEditable {
+  enunciado: String!
+  explicacion: String
+  id: Int!
+  opciones: [String!]!
+  orden: Int!
+  respuestaCorrectaIndex: Int!
+}
+
+type QuizRendimientoAlumno {
+  alumnoId: Int!
+  apellido: String!
+  grupo: String!
+  nombre: String!
+  promedioDominio: Float!
+  quizzesCompletados: Int!
+  totalQuizzes: Int!
+  unidades: [QuizDominioUnidad!]!
+}
+
+type QuizRevisionRespuesta {
+  esCorrecta: Boolean!
+  explicacion: String
+  preguntaId: Int!
+  respuestaCorrectaIndex: Int!
+  respuestaSeleccionada: Int
+}
+
+type QuizUnidad {
+  descripcion: String
+  id: Int!
+  preguntas: [QuizPregunta!]!
+  publicado: Boolean!
+  tipoMateria: TipoMateria!
+  titulo: String!
+  totalPreguntas: Int!
+  unidadId: Int!
+  unidadNombre: String!
+}
+
+type QuizUnidadEditable {
+  descripcion: String
+  id: Int!
+  preguntas: [QuizPreguntaEditable!]!
+  publicado: Boolean!
+  tipoMateria: TipoMateria!
+  titulo: String!
+  unidadId: Int!
+  unidadNombre: String!
 }
 
 input RegistrarEntregaInput {
@@ -223,6 +323,11 @@ input RegistrarEntregaInput {
   mimeType: String!
   nombreArchivo: String!
   tamano: Int!
+}
+
+input RegistrarIntentoQuizInput {
+  quizId: Int!
+  respuestasSeleccionadas: [Int!]!
 }
 
 input RestablecerPasswordInput {
@@ -322,9 +427,20 @@ input UpdateVideoInput {
   descripcion: String
   id: Int!
   publicado: Boolean
+  tipoMateria: TipoMateria
   tipos: [TipoVideo!]
   titulo: String
   youtubeUrl: String
+}
+
+input UpsertQuizUnidadInput {
+  descripcion: String
+  id: Int
+  preguntas: [QuizPreguntaDraftInput!]!
+  publicado: Boolean!
+  tipoMateria: TipoMateria!
+  titulo: String!
+  unidadId: Int!
 }
 
 type Video {
@@ -333,6 +449,7 @@ type Video {
   descripcion: String!
   id: ID!
   publicado: Boolean!
+  tipoMateria: String
   tipos: [TipoVideo!]!
   titulo: String!
   youtubeId: String!

@@ -32,6 +32,9 @@ export class Video {
   @Field()
   publicado: boolean;
 
+  @Field(() => String, { nullable: true })
+  tipoMateria?: string | null;
+
   @Field(() => Int, { nullable: true })
   contenidoId?: number | null;
 

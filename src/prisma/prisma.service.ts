@@ -90,6 +90,10 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     upsert: async ({ data }: QueryArgs) => this.upsertCalificacionAsignacion(data),
   };
 
+  readonly quizUnidad = {
+    delete: async ({ where }: QueryArgs) => this.deleteQuizUnidad(Number(where?.id)),
+  };
+
   readonly insignia = {
     findMany: async () =>
       this.queryRows(
@@ -497,11 +501,16 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
       clauses.push(`v.publicado = $${params.length}`);
     }
 
+    if (typeof where?.tipoMateria === 'string') {
+      params.push(where.tipoMateria);
+      clauses.push(`v."tipoMateria" = $${params.length}`);
+    }
+
     const whereClause = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
 
     const rows = await this.queryRows(
       `
-        SELECT DISTINCT v.id, v.titulo, v.descripcion, v."youtubeUrl", v."youtubeId", v.tipos, v.publicado, v."contenidoId"
+        SELECT DISTINCT v.id, v.titulo, v.descripcion, v."youtubeUrl", v."youtubeId", v.tipos, v.publicado, v."tipoMateria", v."contenidoId"
         FROM "Video" v
         ${joinClause}
         ${whereClause}
@@ -516,7 +525,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   private async findVideoById(id: number) {
     const row = await this.queryOne(
       `
-        SELECT id, titulo, descripcion, "youtubeUrl", "youtubeId", tipos, publicado, "contenidoId"
+        SELECT id, titulo, descripcion, "youtubeUrl", "youtubeId", tipos, publicado, "tipoMateria", "contenidoId"
         FROM "Video"
         WHERE id = $1
       `,
@@ -535,9 +544,9 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     const youtubeId = this.extractYoutubeId(data?.youtubeUrl);
     const row = await this.queryOne(
       `
-        INSERT INTO "Video" (titulo, descripcion, "youtubeUrl", "youtubeId", tipos, publicado, "contenidoId")
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
-        RETURNING id, titulo, descripcion, "youtubeUrl", "youtubeId", tipos, publicado, "contenidoId"
+        INSERT INTO "Video" (titulo, descripcion, "youtubeUrl", "youtubeId", tipos, publicado, "tipoMateria", "contenidoId")
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING id, titulo, descripcion, "youtubeUrl", "youtubeId", tipos, publicado, "tipoMateria", "contenidoId"
       `,
       [
         data?.titulo,
@@ -546,6 +555,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
         youtubeId,
         data?.tipos ?? [],
         data?.publicado ?? true,
+        data?.tipoMateria ?? null,
         data?.contenidoId ?? null,
       ],
     );
@@ -565,9 +575,10 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
         '"youtubeId"': data?.youtubeUrl ? this.extractYoutubeId(data.youtubeUrl) : undefined,
         tipos: data?.tipos,
         publicado: data?.publicado,
+        '"tipoMateria"': data?.tipoMateria,
         '"contenidoId"': data?.contenidoId,
       },
-      'RETURNING id, titulo, descripcion, "youtubeUrl", "youtubeId", tipos, publicado, "contenidoId"',
+      'RETURNING id, titulo, descripcion, "youtubeUrl", "youtubeId", tipos, publicado, "tipoMateria", "contenidoId"',
     );
 
     if (!row) {
@@ -584,7 +595,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   private async deleteVideo(id: number) {
     await this.queryRows('DELETE FROM "_AsignacionToVideo" WHERE "B" = $1', [id]);
     return this.queryOne(
-      'DELETE FROM "Video" WHERE id = $1 RETURNING id, titulo, descripcion, "youtubeUrl", "youtubeId", tipos, publicado, "contenidoId"',
+      'DELETE FROM "Video" WHERE id = $1 RETURNING id, titulo, descripcion, "youtubeUrl", "youtubeId", tipos, publicado, "tipoMateria", "contenidoId"',
       [id],
     );
   }
@@ -624,7 +635,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     const videoIds = [...new Set(links.map((link) => link.videoId))];
     const videos = videoIds.length
       ? await this.queryRows(
-          'SELECT id, titulo, descripcion, "youtubeUrl", "youtubeId", tipos, publicado, "contenidoId" FROM "Video" WHERE id = ANY($1::int[]) ORDER BY id DESC',
+          'SELECT id, titulo, descripcion, "youtubeUrl", "youtubeId", tipos, publicado, "tipoMateria", "contenidoId" FROM "Video" WHERE id = ANY($1::int[]) ORDER BY id DESC',
           [videoIds],
         )
       : [];
@@ -801,6 +812,225 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
       `,
       [alumnoId, asignacionId],
     );
+  }
+
+  async findQuizUnidadesByMateria(
+    tipoMateria: string,
+    options: { onlyPublished?: boolean; includeAnswers?: boolean } = {},
+  ) {
+    const params: unknown[] = [tipoMateria];
+    const clauses = ['q."tipoMateria" = $1'];
+
+    if (options.onlyPublished) {
+      clauses.push('q.publicado = TRUE');
+    }
+
+    const quizzes = await this.queryRows(
+      `
+        SELECT q.id, q.titulo, q.descripcion, q."unidadId", q."tipoMateria", q.publicado,
+               q."createdAt", q."updatedAt", u.nombre AS "unidadNombre"
+        FROM "QuizUnidad" q
+        INNER JOIN "Unidad" u ON u.id = q."unidadId"
+        WHERE ${clauses.join(' AND ')}
+        ORDER BY q."unidadId" ASC, q.id ASC
+      `,
+      params,
+    );
+
+    return this.attachQuizQuestions(quizzes, Boolean(options.includeAnswers));
+  }
+
+  async findQuizUnidadById(
+    id: number,
+    options: { onlyPublished?: boolean; includeAnswers?: boolean } = {},
+  ) {
+    const params: unknown[] = [id];
+    const clauses = ['q.id = $1'];
+
+    if (options.onlyPublished) {
+      clauses.push('q.publicado = TRUE');
+    }
+
+    const quiz = await this.queryOne(
+      `
+        SELECT q.id, q.titulo, q.descripcion, q."unidadId", q."tipoMateria", q.publicado,
+               q."createdAt", q."updatedAt", u.nombre AS "unidadNombre"
+        FROM "QuizUnidad" q
+        INNER JOIN "Unidad" u ON u.id = q."unidadId"
+        WHERE ${clauses.join(' AND ')}
+      `,
+      params,
+    );
+
+    if (!quiz) {
+      return null;
+    }
+
+    const [normalized] = await this.attachQuizQuestions([quiz], Boolean(options.includeAnswers));
+    return normalized ?? null;
+  }
+
+  async upsertQuizUnidad(data?: any) {
+    const unidadId = Number(data?.unidadId);
+    const tipoMateria = String(data?.tipoMateria || '').trim();
+    const unidad = await this.queryOne('SELECT id FROM "Unidad" WHERE id = $1', [unidadId]);
+
+    if (!unidad) {
+      throw new Error('La unidad del quiz no existe');
+    }
+
+    const existing = data?.id
+      ? await this.queryOne('SELECT id FROM "QuizUnidad" WHERE id = $1', [Number(data.id)])
+      : await this.queryOne(
+          'SELECT id FROM "QuizUnidad" WHERE "unidadId" = $1 AND "tipoMateria" = $2',
+          [unidadId, tipoMateria],
+        );
+
+    let quizId = Number(existing?.id || 0);
+
+    if (quizId) {
+      await this.queryOne(
+        `
+          UPDATE "QuizUnidad"
+          SET titulo = $2, descripcion = $3, "unidadId" = $4, "tipoMateria" = $5, publicado = $6, "updatedAt" = NOW()
+          WHERE id = $1
+          RETURNING id
+        `,
+        [quizId, data?.titulo?.trim(), data?.descripcion?.trim() ?? '', unidadId, tipoMateria, Boolean(data?.publicado)],
+      );
+
+      await this.queryRows('DELETE FROM "QuizPregunta" WHERE "quizId" = $1', [quizId]);
+    } else {
+      const created = await this.queryOne(
+        `
+          INSERT INTO "QuizUnidad" (titulo, descripcion, "unidadId", "tipoMateria", publicado, "createdAt", "updatedAt")
+          VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+          RETURNING id
+        `,
+        [data?.titulo?.trim(), data?.descripcion?.trim() ?? '', unidadId, tipoMateria, Boolean(data?.publicado)],
+      );
+      quizId = Number(created?.id);
+    }
+
+    for (const pregunta of data?.preguntas || []) {
+      await this.queryRows(
+        `
+          INSERT INTO "QuizPregunta" ("quizId", enunciado, opciones, "respuestaCorrectaIndex", explicacion, orden)
+          VALUES ($1, $2, $3, $4, $5, $6)
+        `,
+        [
+          quizId,
+          String(pregunta?.enunciado || '').trim(),
+          (pregunta?.opciones || []).map((item: string) => String(item || '').trim()),
+          Number(pregunta?.respuestaCorrectaIndex || 0),
+          String(pregunta?.explicacion || '').trim(),
+          Number(pregunta?.orden || 0),
+        ],
+      );
+    }
+
+    return this.findQuizUnidadById(quizId, { includeAnswers: true, onlyPublished: false });
+  }
+
+  async deleteQuizUnidad(id: number) {
+    return this.queryOne('DELETE FROM "QuizUnidad" WHERE id = $1 RETURNING id', [id]);
+  }
+
+  async createQuizIntento(data?: any) {
+    return this.queryOne(
+      `
+        INSERT INTO "QuizIntento" ("quizId", "alumnoId", "respuestasSeleccionadas", aciertos, "totalPreguntas", porcentaje, "completadoEn")
+        VALUES ($1, $2, $3, $4, $5, $6, NOW())
+        RETURNING id, "quizId", "alumnoId", aciertos, "totalPreguntas", porcentaje, "completadoEn"
+      `,
+      [
+        Number(data?.quizId),
+        Number(data?.alumnoId),
+        data?.respuestasSeleccionadas || [],
+        Number(data?.aciertos || 0),
+        Number(data?.totalPreguntas || 0),
+        Number(data?.porcentaje || 0),
+      ],
+    );
+  }
+
+  async findQuizAttemptsByMateria(
+    tipoMateria: string,
+    filters: { alumnoId?: number; grupo?: string } = {},
+  ) {
+    const params: unknown[] = [tipoMateria];
+    const clauses = ['q."tipoMateria" = $1'];
+
+    if (typeof filters.alumnoId === 'number') {
+      params.push(filters.alumnoId);
+      clauses.push(`i."alumnoId" = $${params.length}`);
+    }
+
+    if (typeof filters.grupo === 'string' && filters.grupo.trim()) {
+      params.push(filters.grupo.trim());
+      clauses.push(`a.grupo = $${params.length}`);
+    }
+
+    return this.queryRows(
+      `
+        SELECT i.id, i."quizId", i."alumnoId", i."respuestasSeleccionadas", i.aciertos, i."totalPreguntas",
+               i.porcentaje, i."completadoEn", a.nombre, a.apellido, a.grupo, q."unidadId", q.titulo, u.nombre AS "unidadNombre"
+        FROM "QuizIntento" i
+        INNER JOIN "QuizUnidad" q ON q.id = i."quizId"
+        INNER JOIN "Alumno" a ON a.id = i."alumnoId"
+        INNER JOIN "Unidad" u ON u.id = q."unidadId"
+        WHERE ${clauses.join(' AND ')}
+        ORDER BY i."completadoEn" DESC, i.id DESC
+      `,
+      params,
+    );
+  }
+
+  private async attachQuizQuestions(quizzes: any[], includeAnswers: boolean) {
+    if (!quizzes.length) {
+      return [];
+    }
+
+    const quizIds = quizzes.map((item) => Number(item.id));
+    const questions = await this.queryRows(
+      `
+        SELECT id, "quizId", enunciado, opciones, "respuestaCorrectaIndex", explicacion, orden
+        FROM "QuizPregunta"
+        WHERE "quizId" = ANY($1::int[])
+        ORDER BY orden ASC, id ASC
+      `,
+      [quizIds],
+    );
+
+    const grouped = new Map<number, any[]>();
+    for (const question of questions) {
+      const key = Number(question.quizId);
+      const current = grouped.get(key) || [];
+      current.push(
+        includeAnswers
+          ? {
+              id: question.id,
+              enunciado: question.enunciado,
+              opciones: question.opciones || [],
+              respuestaCorrectaIndex: question.respuestaCorrectaIndex,
+              explicacion: question.explicacion || '',
+              orden: question.orden,
+            }
+          : {
+              id: question.id,
+              enunciado: question.enunciado,
+              opciones: question.opciones || [],
+              orden: question.orden,
+            },
+      );
+      grouped.set(key, current);
+    }
+
+    return quizzes.map((quiz) => ({
+      ...quiz,
+      totalPreguntas: (grouped.get(Number(quiz.id)) || []).length,
+      preguntas: grouped.get(Number(quiz.id)) || [],
+    }));
   }
 
   private async findCalificacionesAsignacion(where?: Record<string, unknown>) {
@@ -1059,6 +1289,50 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
         "alumnoId" INTEGER NOT NULL REFERENCES "Alumno"(id) ON DELETE CASCADE
       );
       CREATE INDEX IF NOT EXISTS "VerificationCode_alumnoId_idx" ON "VerificationCode"("alumnoId");
+    `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS "QuizUnidad" (
+        id SERIAL PRIMARY KEY,
+        titulo TEXT NOT NULL,
+        descripcion TEXT NOT NULL DEFAULT '',
+        "unidadId" INTEGER NOT NULL REFERENCES "Unidad"(id) ON DELETE CASCADE,
+        "tipoMateria" TEXT NOT NULL,
+        publicado BOOLEAN NOT NULL DEFAULT TRUE,
+        "createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        UNIQUE ("unidadId", "tipoMateria")
+      )
+    `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS "QuizPregunta" (
+        id SERIAL PRIMARY KEY,
+        "quizId" INTEGER NOT NULL REFERENCES "QuizUnidad"(id) ON DELETE CASCADE,
+        enunciado TEXT NOT NULL,
+        opciones TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+        "respuestaCorrectaIndex" INTEGER NOT NULL,
+        explicacion TEXT NOT NULL DEFAULT '',
+        orden INTEGER NOT NULL DEFAULT 0
+      )
+    `);
+
+    await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS "QuizIntento" (
+        id SERIAL PRIMARY KEY,
+        "quizId" INTEGER NOT NULL REFERENCES "QuizUnidad"(id) ON DELETE CASCADE,
+        "alumnoId" INTEGER NOT NULL REFERENCES "Alumno"(id) ON DELETE CASCADE,
+        "respuestasSeleccionadas" INTEGER[] NOT NULL DEFAULT ARRAY[]::INTEGER[],
+        aciertos INTEGER NOT NULL DEFAULT 0,
+        "totalPreguntas" INTEGER NOT NULL DEFAULT 0,
+        porcentaje DOUBLE PRECISION NOT NULL DEFAULT 0,
+        "completadoEn" TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await this.pool.query(`
+      CREATE INDEX IF NOT EXISTS "QuizIntento_alumnoId_idx" ON "QuizIntento"("alumnoId");
+      CREATE INDEX IF NOT EXISTS "QuizIntento_quizId_idx" ON "QuizIntento"("quizId");
     `);
   }
 
